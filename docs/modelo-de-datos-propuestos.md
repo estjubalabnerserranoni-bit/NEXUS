@@ -1,4 +1,3 @@
-[modelo-de-datos-propuesto.md](https://github.com/user-attachments/files/34564820/modelo-de-datos-propuesto.md)
 # Modelo de datos propuesto
 
 SQL Server se utilizará en una etapa futura para conservar el progreso. La versión actual de consola no tiene base de datos; por eso, este modelo es una propuesta y todavía no está implementado.
