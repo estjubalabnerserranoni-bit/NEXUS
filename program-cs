@@ -1,315 +1,287 @@
 using System;
+using System.Drawing;
 using System.IO;
+using System.Text.Json;
+using System.Windows.Forms;
 
-namespace NEXUS_v1;
+namespace NexusJuegoForms;
 
-class Explorador
+internal static class Program
 {
-    public string Nombre { get; }
-    public int Edad { get; }
-    public string RealidadActual { get; }
-    public int Energia { get; private set; } = 100;
-    public int Estabilidad { get; private set; } = 100;
-    public int NivelAcceso { get; private set; } = 1;
-    public bool NucleoInestable { get; private set; }
-
-    public Explorador(string nombre, int edad, string realidad)
+    [STAThread]
+    static void Main()
     {
-        Nombre = nombre;
-        Edad = edad;
-        RealidadActual = realidad;
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new VentanaNexus());
     }
+}
+
+// El explorador controla los recursos del jugador.
+public class Explorador
+{
+    public string Nombre { get; set; } = "";
+    public string RealidadActual { get; set; } = "Alfa";
+    public int Energia { get; set; } = 100;
+    public int Estabilidad { get; set; } = 100;
+    public int NivelAcceso { get; set; } = 1;
+    public bool NucleoInestable { get; set; }
 
     public bool GastarEnergia(int costo)
     {
-        if (Energia < costo)
-        {
-            Console.WriteLine($"IRIS: necesitas {costo} de energía y tienes {Energia}.");
-            return false;
-        }
-
+        if (Energia < costo) return false;
         Energia -= costo;
         return true;
     }
 
-    public void DetectarAnomaliaCritica()
-    {
-        Estabilidad = Math.Max(0, Estabilidad - 20);
-        NucleoInestable = true;
-    }
-
-    public void RecargarEnergia()
+    public void Recargar()
     {
         Energia = Math.Min(100, Energia + 30);
         Estabilidad = Math.Min(100, Estabilidad + 10);
-        Console.WriteLine($"Recarga finalizada. Energía: {Energia}% | Estabilidad: {Estabilidad}%");
-    }
-
-    public void PurgarNucleo()
-    {
-        NucleoInestable = false;
-        Console.WriteLine("IRIS: núcleo estabilizado.");
-    }
-
-    public void RevisarEmergencia()
-    {
-        if (Energia < 20 && Estabilidad < 20 && NucleoInestable)
-        {
-            Energia = 50;
-            Estabilidad = 50;
-            NucleoInestable = false;
-            Console.WriteLine("IRIS: purga de emergencia. Energía y estabilidad recuperadas al 50%.");
-        }
-        else if (Energia < 20 || Estabilidad < 20)
-        {
-            Console.WriteLine("IRIS: recursos bajos. Revisa tu estado antes de continuar.");
-        }
-    }
-
-    public void SubirNivel() => NivelAcceso++;
-
-    public void MostrarEstado()
-    {
-        Console.WriteLine($"\nCadete: {Nombre} | Edad: {Edad} | Acceso: nivel {NivelAcceso}");
-        Console.WriteLine($"Destino: {RealidadActual}");
-        Console.WriteLine($"Energía: {Energia}% | Estabilidad: {Estabilidad}%");
-        Console.WriteLine("Núcleo: " + (NucleoInestable ? "Inestable" : "Normal"));
     }
 }
 
-class Mision
+// La misión recuerda los hallazgos y entrega la recompensa una sola vez.
+public class Mision
 {
-    public string CodigoMision { get; } = "MIS-001";
-    public string Descripcion { get; } = "Recuperar un recurso, analizar una anomalía y volver a la base.";
-    public string Estado { get; private set; } = "Pendiente";
-    public bool RecursoRecuperado { get; private set; }
-    public bool AnomaliaAnalizada { get; private set; }
+    public string Codigo { get; set; } = "MIS-001";
+    public bool TieneRecurso { get; set; }
+    public bool TieneAnalisis { get; set; }
+    public bool Completada { get; set; }
 
-    public void IniciarMision()
+    public bool Entregar(Explorador cadete)
     {
-        Estado = "En curso";
-        Console.WriteLine($"\n{CodigoMision} | {Descripcion}");
-    }
-
-    public void RegistrarRecurso() => RecursoRecuperado = true;
-    public void RegistrarAnalisis() => AnomaliaAnalizada = true;
-
-    public void MostrarObjetivos()
-    {
-        Console.WriteLine($"\n{CodigoMision} | Estado: {Estado}");
-        Console.WriteLine($"[{(RecursoRecuperado ? "X" : " ")}] Recuperar un recurso.");
-        Console.WriteLine($"[{(AnomaliaAnalizada ? "X" : " ")}] Analizar una anomalía.");
-        Console.WriteLine($"[{(Estado == "Completada" ? "X" : " ")}] Entregar los hallazgos en la base.");
-    }
-
-    public void CompletarMision(Explorador cadete)
-    {
-        if (Estado == "Completada")
-        {
-            Console.WriteLine("Esta misión ya fue entregada.");
-            return;
-        }
-
-        if (!RecursoRecuperado || !AnomaliaAnalizada)
-        {
-            Console.WriteLine("IRIS: todavía quedan objetivos pendientes.");
-            MostrarObjetivos();
-            return;
-        }
-
-        Estado = "Completada";
-        cadete.SubirNivel();
-        Console.WriteLine($"MISIÓN COMPLETADA. {cadete.Nombre} obtiene acceso de nivel {cadete.NivelAcceso}.");
+        if (Completada || !TieneRecurso || !TieneAnalisis) return false;
+        Completada = true;
+        cadete.NivelAcceso++;
+        return true;
     }
 }
 
-class Program
+public class Partida
 {
-    // B = base, A = anomalía, R = recurso, . = sector vacío.
-    static readonly char[,] alfa =
-    {
-        { 'B', '.', '.' },
-        { '.', 'R', '.' },
-        { '.', 'A', '.' }
-    };
+    public Explorador Cadete { get; set; } = new();
+    public Mision Mision { get; set; } = new();
+    public int Posicion { get; set; }
+    public bool[] Investigados { get; set; } = new bool[9];
+}
 
-    static readonly char[,] beta =
-    {
-        { 'B', 'A', '.' },
-        { '.', '.', 'R' },
-        { 'A', '.', 'A' }
-    };
+public class VentanaNexus : Form
+{
+    readonly Color fondo = Color.FromArgb(16, 26, 43);
+    readonly Color panel = Color.FromArgb(32, 50, 74);
+    readonly Color turquesa = Color.FromArgb(36, 106, 111);
+    readonly string archivo = Path.Combine(Application.LocalUserAppDataPath, "partida.json");
+    readonly string[] alfa = { "Base", "Vacío", "Vacío", "Vacío", "Recurso", "Vacío", "Vacío", "Anomalía", "Vacío" };
+    readonly string[] beta = { "Base", "Anomalía", "Vacío", "Vacío", "Vacío", "Recurso", "Anomalía", "Vacío", "Anomalía" };
 
-    static void Main()
+    readonly TextBox nombre = new();
+    readonly ComboBox realidad = new();
+    readonly NumericUpDown frecuencia = new();
+    readonly Button[] sectores = new Button[9];
+    readonly Panel juego = new();
+    readonly Label estado = new(), objetivos = new(), iris = new();
+    Partida partida = new();
+
+    Explorador Cadete => partida.Cadete;
+    Mision MisionActual => partida.Mision;
+    string[] Mapa => Cadete.RealidadActual == "Beta" ? beta : alfa;
+
+    public VentanaNexus()
     {
-        try { Jugar(); }
-        catch (EndOfStreamException) { Console.WriteLine("\nTransmisión finalizada."); }
+        Text = "NEXUS | Exploración de realidades";
+        ClientSize = new Size(890, 600);
+        FormBorderStyle = FormBorderStyle.FixedSingle;
+        MaximizeBox = false;
+        StartPosition = FormStartPosition.CenterScreen;
+        Font = new Font("Segoe UI", 10);
+        BackColor = fondo;
+        ForeColor = Color.White;
+
+        Rotulo(this, "NEXUS", 22, 8, 200, 42, 25);
+        Rotulo(this, "Año 2297   /   Centro de exploración", 230, 12, 570, 35);
+        Rotulo(this, "Cadete", 24, 55, 145, 25);
+        Rotulo(this, "Realidad", 235, 55, 120, 25);
+        Poner(this, nombre, 24, 82, 190, 28);
+        nombre.MaxLength = 35;
+        realidad.DropDownStyle = ComboBoxStyle.DropDownList;
+        realidad.Items.AddRange(new object[] { "Alfa", "Beta" });
+        realidad.SelectedIndex = 0;
+        Poner(this, realidad, 235, 82, 120, 28);
+        Boton(this, "Nueva partida", 375, 76, 145, 38, NuevaPartida);
+        Boton(this, "Continuar guardada", 535, 76, 175, 38, Cargar);
+
+        Poner(this, juego, 0, 125, 890, 400);
+        Rotulo(juego, "Mapa de sectores", 24, 5, 345, 35, 16);
+        Rotulo(juego, "Elige una casilla para viajar. Cada viaje cuesta 10.", 24, 45, 400, 32);
+        for (int i = 0; i < sectores.Length; i++)
+        {
+            int sector = i;
+            int x = 24 + (i % 3) * 130;
+            int y = 86 + (i / 3) * 73;
+            sectores[i] = Boton(juego, "", x, y, 122, 64, () => Viajar(sector));
+        }
+
+        Rotulo(juego, "Estado del explorador", 435, 5, 420, 35, 16);
+        Poner(juego, estado, 437, 48, 435, 63);
+        Poner(juego, objetivos, 437, 115, 435, 82);
+        Rotulo(juego, "Frecuencia del escáner (1–100)", 435, 200, 350, 28);
+        frecuencia.Minimum = 1;
+        frecuencia.Maximum = 100;
+        frecuencia.Value = 60;
+        Poner(juego, frecuencia, 437, 235, 85, 30);
+        Boton(juego, "Escanear sector", 535, 229, 155, 38, Escanear);
+        Boton(juego, "Recargar", 437, 282, 115, 38, Recargar);
+        Boton(juego, "Purgar núcleo", 562, 282, 135, 38, Purgar);
+        Boton(juego, "Guardar partida", 707, 282, 145, 38, Guardar);
+
+        iris.BackColor = panel;
+        iris.Padding = new Padding(12);
+        Poner(this, iris, 24, 518, 828, 66);
+        juego.Enabled = false;
+        Aviso("Escribe tu nombre y elige una realidad, o continúa una partida guardada.");
     }
 
-    static void Jugar()
+    void Poner(Control padre, Control control, int x, int y, int ancho, int alto)
     {
-        Console.WriteLine("========== NEXUS | AÑO 2297 ==========");
-        string nombre;
-        do
-        {
-            Console.Write("Nombre del cadete: ");
-            nombre = LeerTexto();
-        } while (nombre.Length == 0);
-
-        int edad = LeerNumero("Edad", 1, 120);
-        Console.WriteLine("1. Realidad Alfa     2. Realidad Beta");
-        int destino = LeerNumero("Elige una realidad", 1, 2);
-
-        Explorador cadete = new Explorador(nombre, edad, destino == 1 ? "Alfa" : "Beta");
-        char[,] mapa = (char[,])(destino == 1 ? alfa : beta).Clone();
-        int fila = 0, columna = 0;
-        Mision mision = new Mision();
-        mision.IniciarMision();
-
-        while (true)
-        {
-            Console.WriteLine($"\n--- NEXUS | {cadete.Nombre} | Energía: {cadete.Energia}% ---");
-            Console.WriteLine("1. Ver mapa y explorar");
-            Console.WriteLine("2. Escanear anomalía del sector actual");
-            Console.WriteLine("3. Consultar estado y misión");
-            Console.WriteLine("4. Recargar energía");
-            Console.WriteLine("5. Terminal IRIS");
-            Console.WriteLine("6. Salir");
-
-            switch (LeerNumero("Opción", 1, 6))
-            {
-                case 1:
-                    Explorar(mapa, cadete, mision, ref fila, ref columna);
-                    break;
-                case 2:
-                    Escanear(mapa, cadete, mision, fila, columna);
-                    break;
-                case 3:
-                    cadete.MostrarEstado();
-                    mision.MostrarObjetivos();
-                    break;
-                case 4:
-                    cadete.RecargarEnergia();
-                    break;
-                case 5:
-                    TerminalIRIS(cadete, mision);
-                    break;
-                case 6:
-                    Console.WriteLine($"Desconexión segura. Hasta pronto, {cadete.Nombre}.");
-                    return;
-            }
-            cadete.RevisarEmergencia();
-        }
+        control.SetBounds(x, y, ancho, alto);
+        padre.Controls.Add(control);
     }
 
-    static void Explorar(char[,] mapa, Explorador cadete, Mision mision,
-                         ref int fila, ref int columna)
+    void Rotulo(Control padre, string texto, int x, int y, int ancho, int alto, int tamano = 10)
     {
-        Console.WriteLine($"\nMapa de la realidad {cadete.RealidadActual}");
-        Console.WriteLine("B: base | R: recurso | A: anomalía | .: vacío | X: explorado");
-        Console.WriteLine("Los corchetes indican tu posición.\n      1  2  3");
-
-        for (int f = 0; f < 3; f++)
-        {
-            Console.Write($"  {f + 1}  ");
-            for (int c = 0; c < 3; c++)
-            {
-                char sector = mapa[f, c];
-                Console.Write(f == fila && c == columna ? $"[{sector}]" : $" {sector} ");
-            }
-            Console.WriteLine();
-        }
-
-        int nuevaFila = LeerNumero("Fila de destino (0 para volver)", 0, 3);
-        if (nuevaFila == 0) return;
-        nuevaFila--;
-        int nuevaColumna = LeerNumero("Columna de destino", 1, 3) - 1;
-
-        if (nuevaFila == fila && nuevaColumna == columna)
-        {
-            Console.WriteLine("Ya estás en ese sector.");
-            return;
-        }
-        if (!cadete.GastarEnergia(10)) return;
-
-        fila = nuevaFila;
-        columna = nuevaColumna;
-        switch (mapa[fila, columna])
-        {
-            case 'B':
-                Console.WriteLine("Llegaste a la base.");
-                mision.CompletarMision(cadete);
-                break;
-            case 'R':
-                mision.RegistrarRecurso();
-                mapa[fila, columna] = 'X';
-                Console.WriteLine("Recurso recuperado y registrado en la misión.");
-                break;
-            case 'A':
-                Console.WriteLine("Anomalía localizada. Usa la opción 2 para escanearla.");
-                break;
-            case 'X':
-                Console.WriteLine("Este sector ya fue investigado.");
-                break;
-            default:
-                Console.WriteLine("Sector vacío. No se encontraron hallazgos.");
-                break;
-        }
+        Label etiqueta = new() { Text = texto, Font = new Font("Segoe UI", tamano),
+            TextAlign = ContentAlignment.MiddleLeft };
+        Poner(padre, etiqueta, x, y, ancho, alto);
     }
 
-    static void Escanear(char[,] mapa, Explorador cadete, Mision mision, int fila, int columna)
+    Button Boton(Control padre, string texto, int x, int y, int ancho, int alto, Action accion)
     {
-        if (mapa[fila, columna] != 'A')
-        {
-            Console.WriteLine("No hay una anomalía pendiente aquí. Busca una A en el mapa.");
-            return;
-        }
+        Button boton = new() { Text = texto, BackColor = panel, ForeColor = Color.White,
+            FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
+        boton.Click += (s, e) => accion();
+        Poner(padre, boton, x, y, ancho, alto);
+        return boton;
+    }
 
-        int frecuencia = LeerNumero("Frecuencia del escáner", 1, 100);
-        if (frecuencia < 40)
-        {
-            Console.WriteLine("Señal débil. Prueba otra frecuencia. Energía consumida: 0.");
-            return;
-        }
+    void Aviso(string mensaje) => iris.Text = "IRIS   |   " + mensaje;
 
-        bool critica = frecuencia > 80;
+    void NuevaPartida()
+    {
+        if (nombre.Text.Trim() == "") { Aviso("Ingresa el nombre del cadete."); return; }
+        if (juego.Enabled && MessageBox.Show("¿Empezar otra partida?", "NEXUS",
+            MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+        partida = new Partida();
+        Cadete.Nombre = nombre.Text.Trim();
+        Cadete.RealidadActual = realidad.Text;
+        juego.Enabled = true;
+        Actualizar();
+        Aviso("MIS-001 iniciada. Recupera un recurso, analiza una anomalía y regresa a la base.");
+    }
+
+    void Viajar(int destino)
+    {
+        if (partida.Posicion == destino) { Aviso("Ya estás en ese sector."); return; }
+        if (!Cadete.GastarEnergia(10)) { Aviso("Necesitas 10 de energía. Usa Recargar."); return; }
+        partida.Posicion = destino;
+        string tipo = Mapa[destino];
+        if (tipo == "Base")
+        {
+            if (MisionActual.Entregar(Cadete)) Aviso("¡Misión completada! Obtuviste acceso de nivel 2.");
+            else Aviso(MisionActual.Completada ? "Misión ya entregada." : "Estás en la base. Revisa tus objetivos.");
+        }
+        else if (partida.Investigados[destino]) Aviso("Ya investigaste este sector.");
+        else if (tipo == "Recurso")
+        {
+            partida.Investigados[destino] = true;
+            MisionActual.TieneRecurso = true;
+            Aviso("Recurso recuperado y añadido al equipo de la misión.");
+        }
+        else if (tipo == "Anomalía") Aviso("Anomalía localizada. Elige una frecuencia y pulsa Escanear sector.");
+        else Aviso("Sector vacío. No se encontraron hallazgos.");
+        Actualizar();
+    }
+
+    void Escanear()
+    {
+        int posicion = partida.Posicion;
+        if (Mapa[posicion] != "Anomalía") { Aviso("Viaja primero a una casilla con anomalía."); return; }
+        if (partida.Investigados[posicion]) { Aviso("Esta anomalía ya fue analizada."); return; }
+        if (frecuencia.Value < 40) { Aviso("Señal débil. Prueba otra frecuencia. Consumo: 0."); return; }
+        bool critica = frecuencia.Value > 80;
         int costo = critica ? 20 : 5;
-        if (!cadete.GastarEnergia(costo)) return;
-
-        if (critica) cadete.DetectarAnomaliaCritica();
-        mision.RegistrarAnalisis();
-        mapa[fila, columna] = 'X';
-        Console.WriteLine(critica
-            ? "Anomalía crítica registrada. Energía -20, estabilidad -20."
-            : "Anomalía estable registrada. Energía -5.");
+        if (!Cadete.GastarEnergia(costo)) { Aviso($"Necesitas {costo} de energía para este escaneo."); return; }
+        if (critica)
+        {
+            Cadete.Estabilidad = Math.Max(0, Cadete.Estabilidad - 20);
+            Cadete.NucleoInestable = true;
+        }
+        partida.Investigados[posicion] = true;
+        MisionActual.TieneAnalisis = true;
+        Aviso(critica ? "Anomalía crítica registrada. Energía -20 y estabilidad -20. Puedes purgar el núcleo."
+                      : "Anomalía estable registrada. Energía -5.");
+        Actualizar();
     }
 
-    static void TerminalIRIS(Explorador cadete, Mision mision)
+    void Recargar()
     {
-        Console.WriteLine("\nIRIS | 1. Diagnóstico   2. Purgar núcleo   3. Volver");
-        int opcion = LeerNumero("Comando", 1, 3);
-        if (opcion == 1)
+        Cadete.Recargar();
+        Actualizar();
+        Aviso("Recarga realizada. Energía y estabilidad actualizadas.");
+    }
+
+    void Purgar()
+    {
+        if (!Cadete.NucleoInestable) { Aviso("El núcleo ya está estable."); return; }
+        Cadete.NucleoInestable = false;
+        Actualizar();
+        Aviso("Purga completada. El núcleo vuelve a funcionar con normalidad.");
+    }
+
+    void Actualizar()
+    {
+        estado.Text = $"{Cadete.Nombre}  |  Realidad {Cadete.RealidadActual}  |  Nivel {Cadete.NivelAcceso}\n" +
+            $"Energía: {Cadete.Energia}%     Estabilidad: {Cadete.Estabilidad}%\n" +
+            $"Núcleo: {(Cadete.NucleoInestable ? "Inestable" : "Normal")}";
+        objetivos.Text = $"{MisionActual.Codigo}  |  {(MisionActual.Completada ? "Completada" : "En curso")}\n" +
+            $"Recurso: {(MisionActual.TieneRecurso ? "Recuperado" : "Pendiente")}\n" +
+            $"Anomalía: {(MisionActual.TieneAnalisis ? "Analizada" : "Pendiente")}\nEntrega: volver a la base";
+        for (int i = 0; i < sectores.Length; i++)
         {
-            cadete.MostrarEstado();
-            mision.MostrarObjetivos();
-        }
-        else if (opcion == 2)
-        {
-            cadete.PurgarNucleo();
+            bool actual = partida.Posicion == i;
+            string marca = partida.Investigados[i] ? " · Listo" : "";
+            sectores[i].Text = $"{i / 3 + 1},{i % 3 + 1}   {Mapa[i]}\n{(actual ? "Aquí" : "")}{marca}";
+            sectores[i].BackColor = actual ? turquesa : panel;
         }
     }
 
-    static string LeerTexto() =>
-        Console.ReadLine()?.Trim() ?? throw new EndOfStreamException();
-
-    static int LeerNumero(string mensaje, int minimo, int maximo)
+    void Guardar()
     {
-        while (true)
+        try
         {
-            Console.Write($"{mensaje} [{minimo}-{maximo}]: ");
-            if (int.TryParse(LeerTexto(), out int numero) && numero >= minimo && numero <= maximo)
-                return numero;
-            Console.WriteLine("Entrada inválida. Escribe un número dentro del rango.");
+            File.WriteAllText(archivo + ".tmp", JsonSerializer.Serialize(partida));
+            File.Move(archivo + ".tmp", archivo, true);
+            Aviso("Partida guardada. Puedes cerrar y usar Continuar guardada al regresar.");
         }
+        catch (Exception error) { Aviso("No se pudo guardar. " + error.Message); }
+    }
+
+    void Cargar()
+    {
+        if (!File.Exists(archivo)) { Aviso("Todavía no hay una partida guardada."); return; }
+        try
+        {
+            var guardada = JsonSerializer.Deserialize<Partida>(File.ReadAllText(archivo));
+            if (guardada?.Cadete == null || guardada.Mision == null || guardada.Investigados?.Length != 9 ||
+                guardada.Posicion < 0 || guardada.Posicion > 8)
+                throw new InvalidDataException("El archivo de la partida está incompleto.");
+            partida = guardada;
+            nombre.Text = Cadete.Nombre;
+            realidad.SelectedItem = Cadete.RealidadActual;
+            juego.Enabled = true;
+            Actualizar();
+            Aviso("Partida recuperada. Continúa desde el sector marcado.");
+        }
+        catch (Exception error) { Aviso("No se pudo cargar. " + error.Message); }
     }
 }
