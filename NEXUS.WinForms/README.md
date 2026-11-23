@@ -1,46 +1,36 @@
-# NEXUS — Aplicación Windows Forms
+# NEXUS — Windows Forms
 
-Esta carpeta contiene la primera versión organizada de la interfaz gráfica de NEXUS. Conserva las mecánicas de exploración, energía, estabilidad, anomalías, misión e IRIS que ya estaban en el prototipo del repositorio.
+Este proyecto es la aplicación gráfica del videojuego NEXUS.
 
 ## Requisitos
 
-- Windows.
-- Visual Studio 2022 actualizado con el SDK de .NET 10 y la carga de trabajo **Desarrollo de escritorio de .NET**.
-- No necesita paquetes externos para ejecutar esta versión.
+- Windows 10/11.
+- Visual Studio 2022 versión 17.8 o posterior.
+- Carga de trabajo **Desarrollo de escritorio de .NET**.
+- SDK de .NET 8.
 
-## Cómo abrir el proyecto
+## Ejecutar
 
-1. Descarga o clona el repositorio.
-2. Abre la carpeta `NEXUS.WinForms`.
-3. Abre el archivo `NEXUS.WinForms.csproj` con Visual Studio.
-4. Espera a que Visual Studio cargue el proyecto.
-5. Ejecuta con el botón **Iniciar** o la tecla F5.
+Se recomienda abrir `NEXUS.sln` desde la raíz del repositorio. En Visual Studio, establece `NEXUS.WinForms` como proyecto de inicio y pulsa F5.
 
-## Qué incluye esta primera versión
+## Funciones
 
-- Registro del nombre del cadete y selección de realidad Alfa o Beta.
-- Mapa de nueve sectores con movimiento entre sectores vecinos.
-- Costo de 10 puntos de energía por viaje.
-- Recolección de una celda de energía.
-- Análisis de anomalías con frecuencia normal o crítica.
-- Control de energía, estabilidad y estado del núcleo.
-- Misión MIS-001 con objetivos y recompensa de nivel de acceso.
-- Inventario básico con uso de celdas de energía.
-- Mensajes y alertas de IRIS.
-- Guardado y continuación local de la partida en formato JSON.
+- Menú principal con tres ranuras de partida.
+- Realidades Alfa y Beta.
+- Mapa de nueve sectores y viajes entre sectores vecinos.
+- Energía, estabilidad y núcleo.
+- Escaneo de anomalías normal y crítico.
+- Inventario con objetos consumibles y materiales.
+- Campaña de cinco misiones.
+- Alertas de IRIS.
+- Guardado local automático en JSON.
+- Repositorio opcional de SQL Server.
 
-## Guardado y SQL Server
+## Estructura
 
-Por ahora, el guardado se realiza en un archivo JSON dentro de la carpeta local de datos del usuario de Windows. Es una solución provisional para probar el ciclo de juego y continuar partidas.
+- `Models`: explorador, partida, mapas, misiones e inventario.
+- `Services`: reglas del juego y campaña.
+- `Forms`: menú y pantallas Windows Forms.
+- `Data`: guardado JSON y SQL Server.
 
-**SQL Server todavía no está conectado.** La conexión con SQL Server se debe implementar en la siguiente etapa mediante una capa de acceso a datos, como indican los documentos de arquitectura del repositorio. No se guarda ninguna contraseña ni cadena de conexión en el código público.
-
-## Organización del código
-
-- `Models`: explorador, misión, partida e inventario.
-- `Services`: reglas de movimiento, energía, exploración y anomalías.
-- `Forms`: pantallas y controles de Windows Forms.
-- `Data`: guardado y carga local provisional.
-- `Program.cs`: punto de inicio de la aplicación.
-
-El código anterior del repositorio, guardado como `program-cs`, se conserva como referencia. El proyecto organizado que se debe abrir y ejecutar está dentro de esta carpeta.
+SQL Server no es necesario para iniciar el juego. Para activarlo, ejecuta `database/01-esquema.sql` y configura `NEXUS_SQLSERVER_CONNECTION` como explica `database/README.md`.
