@@ -1,24 +1,24 @@
-# Modelo de datos propuesto
+# Modelo de datos de NEXUS
 
-SQL Server se utilizará en una etapa futura para conservar el progreso. La versión actual de consola no tiene base de datos; por eso, este modelo es una propuesta y todavía no está implementado.
+NEXUS dispone de guardado local en JSON y de un repositorio opcional para SQL Server. El esquema real que debe ejecutarse está en `database/01-esquema.sql`.
 
-## 1. Tablas principales
+## 1. Tablas
 
-| Tabla | Datos principales | Uso |
+| Tabla | Campos principales | Uso |
 |---|---|---|
-| `Explorador` | `IdExplorador` (PK), `Nombre`, `Energia`, `NivelAcceso`, `RealidadActual` | Datos del jugador. |
-| `Partida` | `IdPartida` (PK), `IdExplorador` (FK), `FechaGuardado` | Guarda una partida de un explorador. |
-| `Mision` | `IdMision` (PK), `Codigo`, `Descripcion` | Catálogo de misiones. |
-| `ProgresoMision` | `IdProgreso` (PK), `IdPartida` (FK), `IdMision` (FK), `Estado` | Guarda el estado de cada misión dentro de una partida. |
-| `Inventario` | `IdInventario` (PK), `IdPartida` (FK), `NombreObjeto`, `Cantidad` | Guarda los objetos de una partida. |
+| `Explorador` | `IdExplorador` (PK), `Nombre`, `FechaRegistro` | Identifica al cadete. |
+| `Partida` | `IdPartida` (PK), `IdExplorador` (FK), `NumeroRanura`, `FechaGuardado`, `Energia`, `Estabilidad`, `NivelAcceso`, `RealidadActual`, `JsonProgreso` | Guarda la ranura y el estado general de la partida. |
+| `Mision` | `IdMision` (PK), `Codigo`, `Nombre`, `Descripcion`, `RealidadObjetivo`, `Recompensa` | Catálogo de misiones. |
+| `ProgresoMision` | `IdProgreso` (PK), `IdPartida` (FK), `IdMision` (FK), `Estado`, `DatosJson` | Guarda el avance particular de cada misión. |
+| `Inventario` | `IdObjeto` (PK), `IdPartida` (FK), `Nombre`, `Descripcion`, `Cantidad` | Guarda los objetos de la partida. |
 
 PK significa clave primaria y FK significa clave foránea.
 
 ## 2. Relaciones
 
-- Un explorador puede tener varias partidas guardadas: `Explorador 1 — N Partida`.
-- Una partida puede tener varios registros de progreso de misión: `Partida 1 — N ProgresoMision`.
-- Una misión puede aparecer en el progreso de muchas partidas: `Mision 1 — N ProgresoMision`.
+- Un explorador puede tener varias partidas: `Explorador 1 — N Partida`.
+- Una partida puede contener el progreso de varias misiones: `Partida 1 — N ProgresoMision`.
+- Una misión del catálogo puede estar presente en muchas partidas: `Mision 1 — N ProgresoMision`.
 - Una partida puede tener varios objetos: `Partida 1 — N Inventario`.
 
 ```mermaid
@@ -29,11 +29,14 @@ erDiagram
  PARTIDA ||--o{ INVENTARIO : contiene
 ```
 
-## 3. Guardar y recuperar
+## 3. Guardado y recuperación
 
-Al guardar, el programa registrará los datos del explorador, la fecha, el estado de las misiones y los objetos. Al continuar, buscará la partida seleccionada y recuperará esos datos para mostrarlos en Windows Forms.
+La clase `SqlServerRepository` abre una conexión con SQL Server y guarda los datos dentro de una transacción. Las consultas usan parámetros para evitar construir sentencias SQL con texto proporcionado por el usuario. Si ocurre un error, la transacción se revierte.
 
-Las operaciones relacionadas con una misma partida deberán guardarse juntas para evitar que quede una parte actualizada y otra no. Se usarán parámetros en las consultas y claves foráneas para mantener las relaciones correctas.
-Las claves primarias identifican cada fila y las foráneas relacionan los registros.
+La partida completa se conserva en `Partida.JsonProgreso` para recuperar su estado exacto, incluyendo energía, estabilidad, realidades, mapas y campaña. Además, el repositorio registra el progreso de cada misión y los objetos en sus tablas correspondientes para permitir consultas posteriores.
 
-Este diseño puede reducirse o ampliarse cuando se definan las pantallas finales. No es necesario crear todas las tablas antes de terminar la primera interfaz.
+## 4. Seguridad y configuración
+
+La cadena de conexión se obtiene de la variable de entorno `NEXUS_SQLSERVER_CONNECTION`. No se incluye usuario, contraseña ni cadena privada en el repositorio.
+
+Para crear la base de datos y configurarla, sigue [database/README.md](../database/README.md). SQL Server es opcional: cuando no está configurado, el juego utiliza las tres ranuras JSON locales.
