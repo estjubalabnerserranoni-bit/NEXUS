@@ -179,6 +179,9 @@ public class JuegoService
         {
             Cadete.Estabilidad = Math.Max(0, Cadete.Estabilidad - 20);
             Cadete.NucleoInestable = true;
+
+            if (mision.RequierePurga)
+                mision.PurgaRealizada = false;
         }
 
         Partida.ZonasExploradas[posicion] = true;
