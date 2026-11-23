@@ -1,55 +1,53 @@
 # Estado de implementación de NEXUS
 
-Este documento distingue lo que ya existe en el repositorio de lo que todavía forma parte de la propuesta.
+Este documento describe lo que está en el repositorio y separa las funciones implementadas de las que todavía requieren una ampliación.
 
-## 1. Código de partida
+## 1. Proyecto para abrir
 
-El archivo `program-cs` se conserva como referencia del prototipo anterior de Windows Forms. Contiene una ventana única, un mapa de nueve sectores, las realidades Alfa y Beta, energía, estabilidad, escaneo de anomalías, una misión inicial, mensajes de IRIS y guardado local en JSON.
+La solución principal es `NEXUS.sln`, ubicada en la raíz. Contiene:
 
-La documentación de H3 describe además una aplicación de consola anterior. Ese código original no está incluido como proyecto completo dentro de la raíz actual del repositorio; por eso no se ha eliminado ni sustituido el archivo de referencia.
+- `NEXUS.WinForms`: aplicación gráfica Windows Forms para .NET 8.
+- `NEXUS.Tests`: programa de pruebas de las reglas principales.
 
-## 2. Nueva organización
+El archivo `program-cs` se conserva como referencia del prototipo inicial y no es el proyecto que debe abrirse para ejecutar el videojuego.
 
-La carpeta `NEXUS.WinForms` contiene el proyecto organizado que se debe abrir y ejecutar:
+## 2. Funciones implementadas
 
-| Carpeta o archivo | Responsabilidad |
-|---|---|
-| `Models` | Explorador, misión, partida e inventario. |
-| `Services` | Reglas de movimiento, exploración, escaneo, energía y estabilidad. |
-| `Forms` | Ventana y controles de Windows Forms. |
-| `Data` | Guardado y recuperación local de partidas. |
-| `Program.cs` | Inicio de la aplicación. |
+- Menú principal de acceso.
+- Registro del nombre del cadete y selección de realidad inicial.
+- Tres ranuras de guardado local, con confirmación antes de reemplazarlas.
+- Continuar una partida guardada.
+- Realidades Alfa y Beta con progreso independiente.
+- Mapa de nueve sectores y movimiento únicamente entre sectores vecinos.
+- Viajes con costo de energía y validación previa.
+- Recuperación de celdas y muestras de anomalía.
+- Análisis normal y crítico con diferentes costos y efectos sobre la estabilidad.
+- Recarga y purga del núcleo en la base.
+- Campaña de cinco misiones con objetivos por realidad, sectores y requisitos.
+- Inventario básico con uso de celdas energéticas.
+- Mensajes de IRIS.
+- Guardado automático local en JSON.
+- Repositorio SQL Server, script de tablas y prueba de conexión opcional.
+- Pruebas automáticas para movimiento, energía, MIS-001, análisis crítico, campaña y migración de guardados antiguos.
 
-La solución `NEXUS.sln` permite abrir el proyecto desde la raíz del repositorio en Visual Studio.
+## 3. Persistencia
 
-## 3. Funciones disponibles en esta etapa
+El modo local guarda las partidas en la carpeta de datos de usuario de Windows, no dentro del repositorio. Esto evita subir partidas personales a GitHub.
 
-- Crear una partida con nombre de cadete y realidad Alfa o Beta.
-- Recorrer un mapa de nueve sectores, avanzando solamente a sectores vecinos.
-- Consumir 10 puntos de energía por viaje.
-- Recuperar una celda de energía y una muestra de anomalía.
-- Usar una celda del inventario para recuperar energía.
-- Analizar anomalías con una frecuencia normal o crítica.
-- Actualizar la estabilidad y el estado del núcleo.
-- Recargar y purgar el núcleo al regresar a la base.
-- Mostrar el estado y los objetivos de MIS-001.
-- Recibir mensajes de ayuda y alertas mediante IRIS.
-- Guardar automáticamente y continuar una partida desde un archivo JSON local.
+La integración SQL está preparada mediante `SqlServerRepository`. Requiere ejecutar el script `database/01-esquema.sql` y configurar la variable de entorno `NEXUS_SQLSERVER_CONNECTION`. Sin esos pasos, el videojuego continúa funcionando con JSON local.
 
-## 4. Persistencia y trabajo pendiente
+## 4. Funcionalidades que pueden ampliarse después
 
-El guardado JSON es temporal y local al equipo donde se ejecuta el juego. Todavía no equivale a una base de datos compartida.
+- Diseño visual con ilustraciones y animaciones propias.
+- Sonidos ambientales y efectos de interfaz.
+- Más tipos de objetos y efectos de inventario.
+- Más mapas y nuevas campañas.
+- Selección y administración visual de varias partidas.
+- Mayor detalle visual de sectores bloqueados y descubiertos.
+- Estadísticas, logros y niveles adicionales.
 
-SQL Server sigue siendo la siguiente etapa de persistencia. Se deberá implementar a través de clases de acceso a datos separadas de los formularios y usar consultas parametrizadas. No hay conexión ni credenciales de SQL Server dentro de esta versión.
+Estas funciones no son necesarias para compilar ni iniciar el proyecto actual.
 
-También quedan para etapas posteriores el menú principal independiente, varias misiones, un inventario más amplio y las funciones adicionales descritas en el diseño. La interfaz actual es una primera versión funcional para probar el ciclo central, no la versión final completa.
+## 5. Ejecución
 
-## 5. Cómo ejecutar
-
-1. Abre `NEXUS.sln` con Visual Studio 2022 actualizado.
-2. Comprueba que esté instalada la carga de trabajo **Desarrollo de escritorio de .NET** y el SDK de .NET 10.
-3. Ejecuta el proyecto `NEXUS.WinForms` con F5.
-4. Escribe el nombre del cadete y elige Alfa o Beta.
-5. Usa el mapa para viajar, explorar y completar la misión inicial.
-
-El proyecto está dirigido a Windows porque utiliza Windows Forms.
+Consulta [Guía para clonar y ejecutar](guia-clonado-y-ejecucion.md). El requisito mínimo del proyecto es Visual Studio 2022 17.8 o posterior con el SDK de .NET 8 y la carga de trabajo de escritorio de .NET.
