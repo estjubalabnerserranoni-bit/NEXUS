@@ -212,7 +212,12 @@ public class JuegoService
         Cadete.Estabilidad = Math.Min(100, Cadete.Estabilidad + 20);
 
         if (MisionActual != null && MisionActual.RequierePurga)
+        {
             MisionActual.PurgaRealizada = true;
+
+            if (MisionActual.Completar(Cadete))
+                return new(true, $"Purga completada. ¡{MisionActual.Codigo} finalizada! Pulsa «Siguiente misión» para continuar.");
+        }
 
         return new(true, "Purga completada. El núcleo se estabilizó y recuperaste 20 puntos de estabilidad.");
     }
