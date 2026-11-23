@@ -1,34 +1,33 @@
-# Arquitectura actual de NEXUS
+# Arquitectura y evolución actual de NEXUS
 
-## 1. Archivos revisados
+## 1. Código de partida
 
-En el archivo comprimido compartido se identificaron estos archivos principales:
+La primera versión documentada en H3 era una aplicación de consola en C#. Incluía las clases `Explorador` y `Mision` y una demostración coordinada desde `Program.Main`. El repositorio conserva el archivo `program-cs` como referencia del prototipo gráfico inicial que se preparó después.
 
-- `ConsoleApp1.slnx`: solución de Visual Studio.
-- `ConsoleApp1/ConsoleApp1.csproj`: proyecto C# configurado como aplicación de consola para `net10.0`.
-- `ConsoleApp1/Program.cs`: contiene las clases y el flujo principal del programa.
+## 2. Prototipo gráfico anterior
 
-## 2. Clases y responsabilidades
+El archivo `program-cs` contiene una ventana única con mapa de nueve sectores, realidades Alfa y Beta, energía, estabilidad, análisis de anomalías, una misión inicial, mensajes de IRIS y guardado JSON en un único archivo.
 
-**`Explorador`**  
-Guarda `Nombre`, `Energia`, `NivelAcceso` y `RealidadActual`. Incluye los métodos `ExplorarRealidad`, `RecargarEnergia` y `MostrarEstado`. La propiedad de energía limita el valor entre 0 y 100.
+Sus límites principales eran:
 
-**`Mision`**  
-Guarda `CodigoMision`, `Descripcion` y `Estado`. Sus métodos `IniciarMision` y `CompletarMision` cambian el estado y muestran mensajes en consola.
+- Todas las clases y controles estaban en un mismo archivo.
+- Solo existía una ranura local.
+- La misión no formaba una campaña.
+- El mapa no separaba por completo la progresión de cada realidad.
+- La base de datos SQL Server no estaba conectada.
 
-**`Program`**  
-El método `Main` inicia la demostración, crea dos exploradores (`Kaelen` y `Lyra`), crea la misión `MIS-001` y ejecuta una secuencia de exploración, recarga y finalización.
+## 3. Solución organizada actual
 
-## 3. Funcionamiento actual
+La solución `NEXUS.sln` contiene el proyecto `NEXUS.WinForms` y el proyecto de pruebas `NEXUS.Tests`. El proyecto se dirige a `net8.0-windows`.
 
-El programa funciona por consola. Los datos de ejemplo están escritos directamente en `Main`; la demostración sigue una secuencia preparada y utiliza mensajes de texto para mostrar los resultados. La lógica básica de energía y misión está dentro de las clases correspondientes.
+El código se separó en carpetas `Models`, `Services`, `Forms` y `Data`. La nueva interfaz incorpora menú principal, tres ranuras, campaña inicial de cinco misiones, inventario y guardado local.
 
-## 4. Limitaciones observadas
+## 4. Datos y persistencia
 
-- No hay ventanas, botones ni mapa gráfico.
-- No hay conexión con SQL Server ni guardado permanente de partidas.
-- No se encontró una clase o sistema de inventario en el código revisado.
-- La demostración usa datos fijos y no presenta un menú para jugar libremente.
-- No se observó una clase separada para administrar varias misiones o zonas.
+El guardado local usa JSON en la carpeta de datos de usuario de Windows. El sistema puede leer los campos principales del guardado del prototipo anterior y convertirlos al nuevo formato de campaña.
 
-Esta descripción corresponde al `Program.cs` incluido en `NEXUS.V1.rar`. Antes de cambiar el código, se debe comprobar que el repositorio de GitHub tenga la misma versión.
+SQL Server se prepara por separado con el script de `database/01-esquema.sql` y `SqlServerRepository`. Para conectarlo hace falta configurar la variable de entorno indicada en `database/README.md`.
+
+## 5. Validación
+
+La compilación y las pruebas se ejecutan mediante el flujo de GitHub Actions. Esto permite detectar errores de compilación y de reglas básicas cada vez que se modifica el repositorio. Las pruebas no sustituyen la revisión manual de la interfaz en Windows.
