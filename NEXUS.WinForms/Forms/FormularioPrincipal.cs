@@ -9,136 +9,291 @@ namespace NexusJuegoForms.Forms;
 
 public class FormularioPrincipal : Form
 {
-    private readonly Color Fondo = Color.FromArgb(16, 26, 43);
-    private readonly Color ColorPanel = Color.FromArgb(32, 50, 74);
-    private readonly Color Turquesa = Color.FromArgb(36, 106, 111);
-    private readonly Color Texto = Color.White;
+    private static readonly Color Fondo = Color.FromArgb(12, 20, 36);
+    private static readonly Color Panel = Color.FromArgb(24, 39, 62);
+    private static readonly Color PanelClaro = Color.FromArgb(34, 55, 82);
+    private static readonly Color Cian = Color.FromArgb(77, 211, 219);
+    private static readonly Color Texto = Color.FromArgb(236, 244, 252);
+    private static readonly Color TextoSuave = Color.FromArgb(166, 187, 207);
+    private static readonly Color Verde = Color.FromArgb(72, 190, 145);
+
+    private readonly Panel panelMenu = new();
+    private readonly Panel panelJuego = new();
+    private readonly Label lblIris = new();
 
     private readonly TextBox txtNombre = new();
     private readonly ComboBox cmbRealidad = new();
+    private readonly ComboBox cmbRanura = new();
+    private readonly Label lblInfoRanura = new();
+
     private readonly TabControl pestanas = new();
-
-    private readonly Label lblEstado = new();
-    private readonly Label lblMision = new();
+    private readonly Label lblCadete = new();
+    private readonly Label lblRecursos = new();
     private readonly Label lblZonaSeleccionada = new();
-    private readonly Label lblIris = new();
+    private readonly Label lblEstadoExplorador = new();
+    private readonly Label lblResumenMision = new();
     private readonly Label lblInventarioAyuda = new();
-    private readonly TextBox txtDetalleMision = new();
 
+    private readonly TextBox txtDetalleMision = new();
     private readonly NumericUpDown numFrecuencia = new();
-    private Button btnEscanear = new();
-    private Button btnRecargar = new();
-    private Button btnPurgar = new();
-    private Button btnUsarCelda = new();
-    private Button btnGuardar = new();
     private readonly ListBox listaInventario = new();
 
     private readonly Button[] botonesZonas = new Button[9];
+    private Button btnEscanear = new();
+    private Button btnRecargar = new();
+    private Button btnPurgar = new();
+    private Button btnCambiarRealidad = new();
+    private Button btnSiguienteMision = new();
+    private Button btnUsarCelda = new();
 
     private JuegoService? juego;
     private int zonaSeleccionada = 1;
 
+    private int RanuraElegida =>
+        int.TryParse(cmbRanura.SelectedItem?.ToString(), out int ranura) ? ranura : 1;
+
     public FormularioPrincipal()
     {
-        Text = "NEXUS | Exploración de realidades";
+        Text = "NEXUS | Exploration / Reality System";
         StartPosition = FormStartPosition.CenterScreen;
-        MinimumSize = new Size(950, 680);
-        Size = new Size(1120, 760);
+        MinimumSize = new Size(1000, 700);
+        Size = new Size(1180, 790);
         BackColor = Fondo;
         ForeColor = Texto;
         Font = new Font("Segoe UI", 10);
+        AutoScaleMode = AutoScaleMode.Dpi;
 
-        CrearInterfaz();
-        pestanas.Enabled = false;
-        MostrarIris("Escribe el nombre del cadete y selecciona una realidad para iniciar una partida.");
+        CrearEstructuraPrincipal();
+        CrearMenuPrincipal();
+        CrearInterfazJuego();
+
+        panelJuego.Visible = false;
+        panelMenu.Visible = true;
+        panelMenu.BringToFront();
+        CargarInformacionRanura();
     }
 
-    private void CrearInterfaz()
+    private void CrearEstructuraPrincipal()
     {
-        TableLayoutPanel principal = new()
-        {
-            Dock = DockStyle.Fill,
-            Padding = new Padding(12),
-            ColumnCount = 1,
-            RowCount = 4,
-            BackColor = Fondo
-        };
-
-        principal.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
-        principal.RowStyles.Add(new RowStyle(SizeType.Absolute, 64));
-        principal.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        principal.RowStyles.Add(new RowStyle(SizeType.Absolute, 48));
-
-        Panel encabezado = new()
+        Panel zonaContenido = new()
         {
             Dock = DockStyle.Fill,
             BackColor = Fondo
         };
 
-        Label titulo = new()
+        panelMenu.Dock = DockStyle.Fill;
+        panelJuego.Dock = DockStyle.Fill;
+
+        zonaContenido.Controls.Add(panelJuego);
+        zonaContenido.Controls.Add(panelMenu);
+
+        lblIris.Dock = DockStyle.Bottom;
+        lblIris.Height = 48;
+        lblIris.BackColor = Panel;
+        lblIris.ForeColor = Cian;
+        lblIris.TextAlign = ContentAlignment.MiddleLeft;
+        lblIris.Padding = new Padding(18, 4, 12, 4);
+        lblIris.Text = "IRIS  |  Sistema de apoyo listo.";
+
+        Controls.Add(zonaContenido);
+        Controls.Add(lblIris);
+        lblIris.BringToFront();
+    }
+
+    private void CrearMenuPrincipal()
+    {
+        TableLayoutPanel layout = new()
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 1,
+            Padding = new Padding(36),
+            BackColor = Fondo
+        };
+
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 57));
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 43));
+
+        Panel presentacion = new()
+        {
+            Dock = DockStyle.Fill,
+            BackColor = Fondo,
+            Padding = new Padding(12, 25, 30, 20)
+        };
+
+        Label marca = new()
         {
             Text = "NEXUS",
-            Font = new Font("Segoe UI", 25, FontStyle.Bold),
-            ForeColor = Color.FromArgb(100, 220, 220),
+            Font = new Font("Segoe UI", 42, FontStyle.Bold),
+            ForeColor = Cian,
             AutoSize = true,
-            Location = new Point(5, 2)
+            Location = new Point(15, 35)
         };
 
         Label subtitulo = new()
         {
-            Text = "EXPLORATION / REALITY SYSTEM     •     AÑO 2297",
+            Text = "EXPLORATION  /  REALITY SYSTEM",
+            Font = new Font("Segoe UI", 12, FontStyle.Bold),
             ForeColor = Texto,
             AutoSize = true,
-            Location = new Point(160, 20)
+            Location = new Point(20, 105)
         };
 
-        encabezado.Controls.Add(titulo);
-        encabezado.Controls.Add(subtitulo);
-        principal.Controls.Add(encabezado, 0, 0);
+        Label linea = new()
+        {
+            Text = "AÑO 2297     •     PROTOCOLO DE EXPLORACIÓN DIMENSIONAL",
+            Font = new Font("Segoe UI", 9),
+            ForeColor = TextoSuave,
+            AutoSize = true,
+            Location = new Point(20, 145)
+        };
 
-        FlowLayoutPanel perfil = new()
+        Label historia = new()
+        {
+            Text = "Las realidades están cambiando.\nLas señales no identificadas aumentan.\nTu misión es investigar las anomalías,\nproteger la estabilidad y descubrir\nel origen del sistema NEXUS.",
+            Font = new Font("Segoe UI", 15),
+            ForeColor = Texto,
+            AutoSize = true,
+            Location = new Point(20, 225)
+        };
+
+        Label estadoSistema = new()
+        {
+            Text = "● IRIS EN LÍNEA     ● SISTEMA DE NAVEGACIÓN DISPONIBLE",
+            Font = new Font("Segoe UI", 9, FontStyle.Bold),
+            ForeColor = Verde,
+            AutoSize = true,
+            Location = new Point(20, 420)
+        };
+
+        presentacion.Controls.AddRange(new Control[] { marca, subtitulo, linea, historia, estadoSistema });
+
+        Panel tarjeta = new()
         {
             Dock = DockStyle.Fill,
-            WrapContents = false,
-            FlowDirection = FlowDirection.LeftToRight,
-            BackColor = ColorPanel,
-            Padding = new Padding(10, 12, 5, 5)
+            BackColor = Panel,
+            Padding = new Padding(26)
         };
 
-        perfil.Controls.Add(CrearEtiqueta("Cadete:"));
-        txtNombre.Width = 190;
-        txtNombre.MaxLength = 35;
-        txtNombre.Margin = new Padding(5, 2, 18, 2);
-        perfil.Controls.Add(txtNombre);
+        Label acceso = new()
+        {
+            Text = "CENTRO DE ACCESO",
+            Font = new Font("Segoe UI", 17, FontStyle.Bold),
+            ForeColor = Texto,
+            AutoSize = true,
+            Location = new Point(26, 25)
+        };
 
-        perfil.Controls.Add(CrearEtiqueta("Realidad:"));
+        Label ayuda = new()
+        {
+            Text = "Identifica al cadete para iniciar la exploración.",
+            Font = new Font("Segoe UI", 9),
+            ForeColor = TextoSuave,
+            AutoSize = true,
+            Location = new Point(28, 65)
+        };
+
+        Label lblNombre = CrearEtiqueta("Nombre del cadete", 10);
+        lblNombre.Location = new Point(28, 115);
+        txtNombre.SetBounds(28, 145, 330, 34);
+        txtNombre.MaxLength = 35;
+        txtNombre.Font = new Font("Segoe UI", 11);
+        txtNombre.BackColor = PanelClaro;
+        txtNombre.ForeColor = Texto;
+        txtNombre.BorderStyle = BorderStyle.FixedSingle;
+
+        Label lblRealidad = CrearEtiqueta("Realidad inicial", 10);
+        lblRealidad.Location = new Point(28, 195);
+        cmbRealidad.SetBounds(28, 225, 155, 34);
         cmbRealidad.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbRealidad.Items.AddRange(new object[] { "Alfa", "Beta" });
         cmbRealidad.SelectedIndex = 0;
-        cmbRealidad.Width = 100;
-        cmbRealidad.Margin = new Padding(5, 2, 18, 2);
-        perfil.Controls.Add(cmbRealidad);
+        cmbRealidad.BackColor = PanelClaro;
+        cmbRealidad.ForeColor = Texto;
 
-        perfil.Controls.Add(CrearBoton("Nueva partida", NuevaPartida, 135));
-        perfil.Controls.Add(CrearBoton("Continuar guardada", ContinuarPartida, 165));
+        Label lblSlot = CrearEtiqueta("Ranura de partida", 10);
+        lblSlot.Location = new Point(205, 195);
+        cmbRanura.SetBounds(205, 225, 153, 34);
+        cmbRanura.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbRanura.Items.AddRange(new object[] { "1", "2", "3" });
+        cmbRanura.SelectedIndex = 0;
+        cmbRanura.BackColor = PanelClaro;
+        cmbRanura.ForeColor = Texto;
+        cmbRanura.SelectedIndexChanged += (_, _) => CargarInformacionRanura();
 
-        principal.Controls.Add(perfil, 0, 1);
+        lblInfoRanura.SetBounds(28, 268, 330, 42);
+        lblInfoRanura.ForeColor = TextoSuave;
+        lblInfoRanura.Font = new Font("Segoe UI", 9);
+
+        Button btnNueva = CrearBoton("NUEVA PARTIDA", NuevaPartida, 330, 45, destacado: true);
+        btnNueva.SetBounds(28, 330, 330, 45);
+
+        Button btnContinuar = CrearBoton("CONTINUAR PARTIDA", ContinuarPartida, 330, 42);
+        btnContinuar.SetBounds(28, 387, 330, 42);
+
+        Button btnAjustes = CrearBoton("CONFIGURACIÓN / AYUDA", MostrarAyuda, 158, 38);
+        btnAjustes.SetBounds(28, 445, 158, 38);
+
+        Button btnSalir = CrearBoton("SALIR", Salir, 158, 38);
+        btnSalir.SetBounds(200, 445, 158, 38);
+
+        tarjeta.Controls.AddRange(new Control[]
+        {
+            acceso, ayuda, lblNombre, txtNombre, lblRealidad, cmbRealidad,
+            lblSlot, cmbRanura, lblInfoRanura, btnNueva, btnContinuar,
+            btnAjustes, btnSalir
+        });
+
+        layout.Controls.Add(presentacion, 0, 0);
+        layout.Controls.Add(tarjeta, 1, 0);
+        panelMenu.Controls.Add(layout);
+    }
+
+    private void CrearInterfazJuego()
+    {
+        TableLayoutPanel layout = new()
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 2,
+            Padding = new Padding(12),
+            BackColor = Fondo
+        };
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+        FlowLayoutPanel encabezado = new()
+        {
+            Dock = DockStyle.Fill,
+            BackColor = Panel,
+            Padding = new Padding(12, 9, 8, 5),
+            WrapContents = false
+        };
+
+        lblCadete.Width = 230;
+        lblCadete.Height = 50;
+        lblCadete.ForeColor = Cian;
+        lblCadete.TextAlign = ContentAlignment.MiddleLeft;
+        encabezado.Controls.Add(lblCadete);
+
+        lblRecursos.Width = 345;
+        lblRecursos.Height = 50;
+        lblRecursos.ForeColor = Texto;
+        lblRecursos.TextAlign = ContentAlignment.MiddleLeft;
+        encabezado.Controls.Add(lblRecursos);
+
+        Button btnMenu = CrearBoton("MENÚ PRINCIPAL", VolverAlMenu, 150, 38);
+        btnMenu.Margin = new Padding(10, 6, 5, 5);
+        encabezado.Controls.Add(btnMenu);
 
         pestanas.Dock = DockStyle.Fill;
-        pestanas.Appearance = TabAppearance.Normal;
         pestanas.Controls.Add(CrearPaginaExploracion());
-        pestanas.Controls.Add(CrearPaginaMision());
+        pestanas.Controls.Add(CrearPaginaMisiones());
         pestanas.Controls.Add(CrearPaginaInventario());
-        principal.Controls.Add(pestanas, 0, 2);
 
-        lblIris.Dock = DockStyle.Fill;
-        lblIris.BackColor = ColorPanel;
-        lblIris.ForeColor = Color.FromArgb(180, 235, 235);
-        lblIris.TextAlign = ContentAlignment.MiddleLeft;
-        lblIris.Padding = new Padding(12, 5, 8, 5);
-        principal.Controls.Add(lblIris, 0, 3);
-
-        Controls.Add(principal);
+        layout.Controls.Add(encabezado, 0, 0);
+        layout.Controls.Add(pestanas, 0, 1);
+        panelJuego.Controls.Add(layout);
     }
 
     private TabPage CrearPaginaExploracion()
@@ -146,36 +301,34 @@ public class FormularioPrincipal : Form
         TabPage pagina = new("Exploración")
         {
             BackColor = Fondo,
-            Padding = new Padding(10)
+            Padding = new Padding(8)
         };
 
-        SplitContainer division = new()
+        SplitContainer split = new()
         {
             Dock = DockStyle.Fill,
-            Size = new Size(1000, 600),
-            SplitterDistance = 570,
-            BackColor = Fondo,
-            BorderStyle = BorderStyle.None
+            Orientation = Orientation.Vertical,
+            SplitterDistance = 560,
+            BackColor = Fondo
         };
 
-        TableLayoutPanel mapa = new()
+        TableLayoutPanel panelMapa = new()
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
             RowCount = 3,
-            BackColor = Fondo,
-            Padding = new Padding(5)
+            Padding = new Padding(5),
+            BackColor = Fondo
         };
+        panelMapa.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
+        panelMapa.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        panelMapa.RowStyles.Add(new RowStyle(SizeType.Absolute, 76));
 
-        mapa.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-        mapa.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        mapa.RowStyles.Add(new RowStyle(SizeType.Absolute, 82));
-
-        Label tituloMapa = CrearEtiqueta("MAPA DE SECTORES");
+        Label tituloMapa = CrearEtiqueta("MAPA DE SECTORES", 15);
         tituloMapa.Font = new Font("Segoe UI", 15, FontStyle.Bold);
-        mapa.Controls.Add(tituloMapa, 0, 0);
+        panelMapa.Controls.Add(tituloMapa, 0, 0);
 
-        TableLayoutPanel cuadrilla = new()
+        TableLayoutPanel grid = new()
         {
             Dock = DockStyle.Fill,
             ColumnCount = 3,
@@ -183,132 +336,144 @@ public class FormularioPrincipal : Form
             BackColor = Fondo
         };
 
-        for (int columna = 0; columna < 3; columna++)
+        for (int i = 0; i < 3; i++)
         {
-            cuadrilla.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
+            grid.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
         }
 
-        for (int fila = 0; fila < 3; fila++)
-        {
-            cuadrilla.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
-        }
-
-        for (int i = 0; i < botonesZonas.Length; i++)
+        for (int i = 0; i < 9; i++)
         {
             int indice = i;
-            Button boton = CrearBoton("", () => SeleccionarZona(indice), 120);
+            Button boton = CrearBoton("", () => SeleccionarZona(indice), 120, 70);
             boton.Dock = DockStyle.Fill;
             boton.Margin = new Padding(5);
-            boton.Height = 95;
             botonesZonas[i] = boton;
-            cuadrilla.Controls.Add(boton, i % 3, i / 3);
+            grid.Controls.Add(boton, i % 3, i / 3);
         }
 
-        mapa.Controls.Add(cuadrilla, 0, 1);
+        panelMapa.Controls.Add(grid, 0, 1);
 
-        FlowLayoutPanel seleccion = new()
+        FlowLayoutPanel filaSeleccion = new()
         {
             Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.LeftToRight,
             WrapContents = false,
-            Padding = new Padding(2, 12, 2, 2)
+            Padding = new Padding(3, 10, 2, 2)
         };
 
-        lblZonaSeleccionada.AutoSize = false;
-        lblZonaSeleccionada.Width = 320;
-        lblZonaSeleccionada.Height = 45;
+        lblZonaSeleccionada.Width = 300;
+        lblZonaSeleccionada.Height = 48;
+        lblZonaSeleccionada.ForeColor = Texto;
         lblZonaSeleccionada.TextAlign = ContentAlignment.MiddleLeft;
-        seleccion.Controls.Add(lblZonaSeleccionada);
-        seleccion.Controls.Add(CrearBoton("Viajar a zona", ViajarSeleccionado, 150));
-        mapa.Controls.Add(seleccion, 0, 2);
+        filaSeleccion.Controls.Add(lblZonaSeleccionada);
+        filaSeleccion.Controls.Add(CrearBoton("VIAJAR A ZONA", ViajarSeleccionado, 150, 40, true));
+        panelMapa.Controls.Add(filaSeleccion, 0, 2);
 
-        division.Panel1.Controls.Add(mapa);
+        split.Panel1.Controls.Add(panelMapa);
 
-        FlowLayoutPanel controles = new()
+        FlowLayoutPanel acciones = new()
         {
             Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
             AutoScroll = true,
-            Padding = new Padding(15, 5, 5, 5),
+            Padding = new Padding(15, 8, 5, 5),
             BackColor = Fondo
         };
 
-        Label tituloEstado = CrearEtiqueta("ESTADO DEL EXPLORADOR");
-        tituloEstado.Font = new Font("Segoe UI", 14, FontStyle.Bold);
-        tituloEstado.Width = 390;
-        controles.Controls.Add(tituloEstado);
+        Label tituloEstado = CrearEtiqueta("ESTADO DEL EXPLORADOR", 13);
+        tituloEstado.Font = new Font("Segoe UI", 13, FontStyle.Bold);
+        acciones.Controls.Add(tituloEstado);
 
-        lblEstado.AutoSize = false;
-        lblEstado.Width = 390;
-        lblEstado.Height = 105;
-        lblEstado.BackColor = ColorPanel;
-        lblEstado.Padding = new Padding(10);
-        controles.Controls.Add(lblEstado);
+        lblEstadoExplorador.AutoSize = false;
+        lblEstadoExplorador.Width = 390;
+        lblEstadoExplorador.Height = 95;
+        lblEstadoExplorador.BackColor = Panel;
+        lblEstadoExplorador.Padding = new Padding(10);
+        acciones.Controls.Add(lblEstadoExplorador);
 
-        Label tituloMision = CrearEtiqueta("MISIÓN ACTIVA");
-        tituloMision.Font = new Font("Segoe UI", 12, FontStyle.Bold);
-        controles.Controls.Add(tituloMision);
+        Label tituloResumen = CrearEtiqueta("MISIÓN ACTIVA", 12);
+        tituloResumen.Font = new Font("Segoe UI", 12, FontStyle.Bold);
+        acciones.Controls.Add(tituloResumen);
 
-        lblMision.AutoSize = false;
-        lblMision.Width = 390;
-        lblMision.Height = 115;
-        lblMision.BackColor = ColorPanel;
-        lblMision.Padding = new Padding(10);
-        controles.Controls.Add(lblMision);
+        lblResumenMision.AutoSize = false;
+        lblResumenMision.Width = 390;
+        lblResumenMision.Height = 115;
+        lblResumenMision.BackColor = Panel;
+        lblResumenMision.Padding = new Padding(10);
+        acciones.Controls.Add(lblResumenMision);
 
-        Label tituloFrecuencia = CrearEtiqueta("Frecuencia del escáner (1–100)");
-        controles.Controls.Add(tituloFrecuencia);
-
+        acciones.Controls.Add(CrearEtiqueta("Frecuencia del escáner", 10));
         numFrecuencia.Minimum = 1;
         numFrecuencia.Maximum = 100;
         numFrecuencia.Value = 60;
-        numFrecuencia.Width = 90;
-        controles.Controls.Add(numFrecuencia);
+        numFrecuencia.Width = 100;
+        acciones.Controls.Add(numFrecuencia);
 
-        btnEscanear = CrearBoton("Escanear anomalía", Escanear, 190);
-        controles.Controls.Add(btnEscanear);
+        btnEscanear = CrearBoton("ESCANEAR ANOMALÍA", Escanear, 215, 40, true);
+        btnRecargar = CrearBoton("RECARGAR EN LA BASE", Recargar, 215, 40);
+        btnPurgar = CrearBoton("PURGAR NÚCLEO", Purgar, 215, 40);
+        btnCambiarRealidad = CrearBoton("CAMBIAR REALIDAD", CambiarRealidad, 215, 40);
+        Button btnGuardar = CrearBoton("GUARDAR PARTIDA", GuardarPartida, 215, 40);
 
-        btnRecargar = CrearBoton("Recargar en la base", Recargar, 190);
-        controles.Controls.Add(btnRecargar);
+        acciones.Controls.Add(btnEscanear);
+        acciones.Controls.Add(btnRecargar);
+        acciones.Controls.Add(btnPurgar);
+        acciones.Controls.Add(btnCambiarRealidad);
+        acciones.Controls.Add(btnGuardar);
 
-        btnPurgar = CrearBoton("Purgar núcleo", Purgar, 190);
-        controles.Controls.Add(btnPurgar);
-
-        btnGuardar = CrearBoton("Guardar partida", GuardarPartida, 190);
-        controles.Controls.Add(btnGuardar);
-
-        division.Panel2.Controls.Add(controles);
-        pagina.Controls.Add(division);
-
+        split.Panel2.Controls.Add(acciones);
+        pagina.Controls.Add(split);
         return pagina;
     }
 
-    private TabPage CrearPaginaMision()
+    private TabPage CrearPaginaMisiones()
     {
         TabPage pagina = new("Misiones")
         {
             BackColor = Fondo,
-            Padding = new Padding(25)
+            Padding = new Padding(22)
         };
 
-        Label titulo = CrearEtiqueta("REGISTRO DE MISIONES");
-        titulo.Font = new Font("Segoe UI", 18, FontStyle.Bold);
-        titulo.Dock = DockStyle.Top;
-        titulo.Height = 55;
+        TableLayoutPanel layout = new()
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 1,
+            RowCount = 3,
+            BackColor = Fondo
+        };
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 72));
 
+        Label titulo = CrearEtiqueta("REGISTRO DE CAMPAÑA", 18);
+        titulo.Font = new Font("Segoe UI", 18, FontStyle.Bold);
+        layout.Controls.Add(titulo, 0, 0);
+
+        txtDetalleMision.Dock = DockStyle.Fill;
         txtDetalleMision.Multiline = true;
         txtDetalleMision.ReadOnly = true;
-        txtDetalleMision.Dock = DockStyle.Fill;
-        txtDetalleMision.BackColor = ColorPanel;
+        txtDetalleMision.BackColor = Panel;
         txtDetalleMision.ForeColor = Texto;
         txtDetalleMision.BorderStyle = BorderStyle.None;
         txtDetalleMision.Font = new Font("Segoe UI", 12);
         txtDetalleMision.ScrollBars = ScrollBars.Vertical;
+        txtDetalleMision.Padding = new Padding(12);
+        layout.Controls.Add(txtDetalleMision, 0, 1);
 
-        pagina.Controls.Add(txtDetalleMision);
-        pagina.Controls.Add(titulo);
+        FlowLayoutPanel botones = new()
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.LeftToRight,
+            Padding = new Padding(2, 12, 2, 2)
+        };
+        btnSiguienteMision = CrearBoton("SIGUIENTE MISIÓN", SiguienteMision, 220, 42, true);
+        botones.Controls.Add(btnSiguienteMision);
+        botones.Controls.Add(CrearBoton("VOLVER A EXPLORACIÓN", () => pestanas.SelectedIndex = 0, 220, 42));
+        layout.Controls.Add(botones, 0, 2);
 
+        pagina.Controls.Add(layout);
         return pagina;
     }
 
@@ -317,81 +482,79 @@ public class FormularioPrincipal : Form
         TabPage pagina = new("Inventario")
         {
             BackColor = Fondo,
-            Padding = new Padding(25)
+            Padding = new Padding(22)
         };
 
-        TableLayoutPanel contenido = new()
+        TableLayoutPanel layout = new()
         {
             Dock = DockStyle.Fill,
             ColumnCount = 1,
             RowCount = 3,
             BackColor = Fondo
         };
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 78));
 
-        contenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 55));
-        contenido.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        contenido.RowStyles.Add(new RowStyle(SizeType.Absolute, 85));
-
-        Label titulo = CrearEtiqueta("INVENTARIO DEL CADETE");
+        Label titulo = CrearEtiqueta("INVENTARIO DEL CADETE", 18);
         titulo.Font = new Font("Segoe UI", 18, FontStyle.Bold);
-        contenido.Controls.Add(titulo, 0, 0);
+        layout.Controls.Add(titulo, 0, 0);
 
         listaInventario.Dock = DockStyle.Fill;
-        listaInventario.BackColor = ColorPanel;
+        listaInventario.BackColor = Panel;
         listaInventario.ForeColor = Texto;
         listaInventario.Font = new Font("Segoe UI", 11);
-        contenido.Controls.Add(listaInventario, 0, 1);
+        layout.Controls.Add(listaInventario, 0, 1);
 
-        FlowLayoutPanel acciones = new()
+        FlowLayoutPanel fila = new()
         {
             Dock = DockStyle.Fill,
             FlowDirection = FlowDirection.LeftToRight,
-            Padding = new Padding(2, 12, 2, 2)
+            Padding = new Padding(2, 10, 2, 2)
         };
+        btnUsarCelda = CrearBoton("USAR CELDA DE ENERGÍA", UsarCelda, 220, 42, true);
+        fila.Controls.Add(btnUsarCelda);
 
-        btnUsarCelda = CrearBoton("Usar celda de energía", UsarCelda, 200);
-        acciones.Controls.Add(btnUsarCelda);
-
-        lblInventarioAyuda.AutoSize = false;
-        lblInventarioAyuda.Width = 430;
-        lblInventarioAyuda.Height = 50;
+        lblInventarioAyuda.Width = 500;
+        lblInventarioAyuda.Height = 48;
+        lblInventarioAyuda.ForeColor = TextoSuave;
         lblInventarioAyuda.TextAlign = ContentAlignment.MiddleLeft;
-        acciones.Controls.Add(lblInventarioAyuda);
+        fila.Controls.Add(lblInventarioAyuda);
 
-        contenido.Controls.Add(acciones, 0, 2);
-        pagina.Controls.Add(contenido);
-
+        layout.Controls.Add(fila, 0, 2);
+        pagina.Controls.Add(layout);
         return pagina;
     }
 
-    private Label CrearEtiqueta(string texto)
+    private Label CrearEtiqueta(string texto, int tamano)
     {
         return new Label
         {
             Text = texto,
-            ForeColor = Texto,
             AutoSize = true,
-            Margin = new Padding(5, 8, 5, 5)
+            ForeColor = Texto,
+            Font = new Font("Segoe UI", tamano),
+            Margin = new Padding(5, 7, 5, 5)
         };
     }
 
-    private Button CrearBoton(string texto, Action accion, int ancho)
+    private Button CrearBoton(string texto, Action accion, int ancho, int alto, bool destacado = false)
     {
         Button boton = new()
         {
             Text = texto,
             Width = ancho,
-            Height = 38,
-            BackColor = ColorPanel,
+            Height = alto,
+            BackColor = destacado ? Color.FromArgb(27, 106, 119) : PanelClaro,
             ForeColor = Texto,
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
-            Margin = new Padding(5)
+            Font = new Font("Segoe UI", 9, FontStyle.Bold),
+            Margin = new Padding(4)
         };
-
-        boton.FlatAppearance.BorderColor = Turquesa;
+        boton.FlatAppearance.BorderColor = destacado ? Cian : Color.FromArgb(65, 92, 120);
+        boton.FlatAppearance.MouseOverBackColor = Color.FromArgb(45, 85, 112);
         boton.Click += (_, _) => accion();
-
         return boton;
     }
 
@@ -401,75 +564,134 @@ public class FormularioPrincipal : Form
 
         if (string.IsNullOrWhiteSpace(nombre))
         {
-            MostrarIris("Debes escribir el nombre del cadete antes de iniciar.");
+            MostrarIris("Debes escribir el nombre del cadete.");
             txtNombre.Focus();
             return;
         }
 
-        if (juego != null)
+        int ranura = RanuraElegida;
+
+        if (GuardadoLocal.ExistePartida(ranura))
         {
             DialogResult respuesta = MessageBox.Show(
-                "¿Quieres iniciar otra partida? El progreso actual se reemplazará al guardar.",
-                "NEXUS",
+                $"La ranura {ranura} ya contiene una partida. ¿Quieres reemplazarla?",
+                "Confirmar nueva partida",
                 MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                MessageBoxIcon.Warning);
 
             if (respuesta != DialogResult.Yes)
-            {
                 return;
-            }
         }
 
-        Partida nueva = new()
+        Partida partida = new()
         {
+            NumeroRanura = ranura,
             Cadete = new Explorador
             {
                 Nombre = nombre,
                 RealidadActual = cmbRealidad.SelectedItem?.ToString() ?? "Alfa"
-            }
+            },
+            Misiones = CampanaService.CrearCampana(),
+            ProgresoAlfa = new ProgresoMapa(),
+            ProgresoBeta = new ProgresoMapa()
         };
 
-        juego = new JuegoService(nueva);
+        juego = new JuegoService(partida);
         zonaSeleccionada = 1;
-        pestanas.Enabled = true;
-        ActualizarInterfaz();
-        MostrarIris("MIS-001 iniciada. Recupera una celda, analiza una anomalía y regresa a la base.");
+        AbrirJuego();
         GuardarAutomaticamente();
+        MostrarIris($"Bienvenido, {nombre}. MIS-001 está activa. IRIS te guiará durante la exploración.");
     }
 
     private void ContinuarPartida()
     {
         try
         {
-            Partida? guardada = GuardadoLocal.Cargar();
-
-            if (guardada == null)
+            Partida? partida = GuardadoLocal.Cargar(RanuraElegida);
+            if (partida == null)
             {
-                MostrarIris("Todavía no existe una partida guardada en este equipo.");
+                MostrarIris("Esta ranura está vacía. Crea una nueva partida o selecciona otra ranura.");
                 return;
             }
 
-            juego = new JuegoService(guardada);
-            txtNombre.Text = juego.Cadete.Nombre;
-            cmbRealidad.SelectedItem = juego.Cadete.RealidadActual;
+            juego = new JuegoService(partida);
             zonaSeleccionada = juego.Partida.PosicionActual;
-            pestanas.Enabled = true;
-
-            ActualizarInterfaz();
-            MostrarIris("Partida recuperada. Puedes continuar desde el último sector guardado.");
+            AbrirJuego();
+            MostrarIris($"Partida de {juego.Cadete.Nombre} recuperada correctamente.");
         }
         catch (Exception)
         {
-            MostrarIris("No se pudo cargar la partida. El archivo guardado puede estar dañado.");
+            MostrarIris("No se pudo leer esta partida. El archivo puede estar dañado.");
+        }
+    }
+
+    private void AbrirJuego()
+    {
+        panelMenu.Visible = false;
+        panelJuego.Visible = true;
+        panelJuego.BringToFront();
+        pestanas.SelectedIndex = 0;
+        ActualizarInterfaz();
+    }
+
+    private void VolverAlMenu()
+    {
+        if (juego != null)
+            GuardarAutomaticamente();
+
+        panelJuego.Visible = false;
+        panelMenu.Visible = true;
+        panelMenu.BringToFront();
+        CargarInformacionRanura();
+        MostrarIris("Estás en el centro de acceso. Tu progreso se conserva en la ranura seleccionada.");
+    }
+
+    private void CargarInformacionRanura()
+    {
+        if (cmbRanura.SelectedItem == null)
+            return;
+
+        try
+        {
+            lblInfoRanura.Text = GuardadoLocal.ObtenerDescripcionRanura(RanuraElegida);
+        }
+        catch
+        {
+            lblInfoRanura.Text = "No se pudo leer la información de la ranura.";
+        }
+    }
+
+    private void MostrarAyuda()
+    {
+        MessageBox.Show(
+            "NEXUS — Ayuda rápida\n\n" +
+            "1. Escribe el nombre del cadete y elige una ranura.\n" +
+            "2. Inicia una partida o continúa una guardada.\n" +
+            "3. Selecciona un sector vecino y pulsa VIAJAR A ZONA.\n" +
+            "4. Recupera recursos y analiza las anomalías indicadas por la misión.\n" +
+            "5. Vuelve a la base para recargar, purgar el núcleo y completar objetivos.\n" +
+            "6. Usa SIGUIENTE MISIÓN para avanzar en la campaña.\n\n" +
+            "Cada viaje cuesta 10 puntos de energía. Los análisis normales cuestan 5 y los críticos 20.",
+            "Ayuda de NEXUS",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+    }
+
+    private void Salir()
+    {
+        if (MessageBox.Show("¿Deseas cerrar NEXUS?", "Salir",
+            MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+        {
+            if (juego != null)
+                GuardarAutomaticamente();
+            Close();
         }
     }
 
     private void SeleccionarZona(int indice)
     {
         if (juego == null)
-        {
             return;
-        }
 
         zonaSeleccionada = indice;
         ActualizarInterfaz();
@@ -482,8 +704,7 @@ public class FormularioPrincipal : Form
 
     private void Escanear()
     {
-        int frecuencia = (int)numFrecuencia.Value;
-        EjecutarAccion(() => juego!.Escanear(frecuencia));
+        EjecutarAccion(() => juego!.Escanear((int)numFrecuencia.Value));
     }
 
     private void Recargar()
@@ -496,6 +717,24 @@ public class FormularioPrincipal : Form
         EjecutarAccion(() => juego!.PurgarNucleo());
     }
 
+    private void CambiarRealidad()
+    {
+        EjecutarAccion(() => juego!.CambiarRealidad());
+    }
+
+    private void SiguienteMision()
+    {
+        if (juego == null)
+            return;
+
+        ResultadoAccion resultado = juego.AvanzarMision();
+        MostrarIris(resultado.Mensaje);
+        ActualizarInterfaz();
+
+        if (resultado.Exito)
+            GuardarAutomaticamente();
+    }
+
     private void UsarCelda()
     {
         EjecutarAccion(() => juego!.UsarCeldaEnergia());
@@ -504,78 +743,110 @@ public class FormularioPrincipal : Form
     private void EjecutarAccion(Func<ResultadoAccion> accion)
     {
         if (juego == null)
-        {
             return;
-        }
 
         ResultadoAccion resultado = accion();
         MostrarIris(resultado.Mensaje);
         ActualizarInterfaz();
 
         if (resultado.Exito)
-        {
             GuardarAutomaticamente();
-        }
     }
 
     private void GuardarPartida()
     {
         if (juego == null)
         {
-            MostrarIris("Primero debes iniciar o continuar una partida.");
+            MostrarIris("No existe una partida activa para guardar.");
             return;
         }
 
         try
         {
             GuardadoLocal.Guardar(juego.Partida);
-            MostrarIris("Partida guardada correctamente en este equipo.");
+            MostrarIris($"Partida guardada correctamente en la ranura {juego.Partida.NumeroRanura}.");
         }
-        catch (Exception)
+        catch
         {
-            MostrarIris("No se pudo guardar la partida. Comprueba los permisos de la carpeta del usuario.");
+            MostrarIris("No se pudo guardar. Comprueba los permisos de la carpeta de datos de usuario.");
         }
     }
 
     private void GuardarAutomaticamente()
     {
         if (juego == null)
-        {
             return;
-        }
 
         try
         {
             GuardadoLocal.Guardar(juego.Partida);
         }
-        catch (Exception)
+        catch
         {
-            MostrarIris("La acción se realizó, pero no se pudo guardar automáticamente. Pulsa Guardar partida.");
+            MostrarIris("No se pudo guardar automáticamente. Usa el botón Guardar partida.");
         }
     }
 
     private void ActualizarInterfaz()
     {
         if (juego == null)
-        {
             return;
-        }
 
         Explorador cadete = juego.Cadete;
-        Mision mision = juego.MisionActual;
+        Mision? mision = juego.MisionActual;
 
-        lblEstado.Text =
-            $"Cadete: {cadete.Nombre}\n" +
-            $"Realidad: {cadete.RealidadActual}   |   Nivel de acceso: {cadete.NivelAcceso}\n" +
-            $"Energía: {cadete.Energia}/100   |   Estabilidad: {cadete.Estabilidad}/100\n" +
-            $"Núcleo: {(cadete.NucleoInestable ? "Inestable" : "Normal")}";
+        lblCadete.Text = $"NEXUS  /  {cadete.Nombre}\nREALIDAD {cadete.RealidadActual.ToUpperInvariant()}";
+        lblRecursos.Text =
+            $"ENERGÍA  {cadete.Energia}/100     ESTABILIDAD  {cadete.Estabilidad}/100\n" +
+            $"NIVEL {cadete.NivelAcceso}     NÚCLEO {(cadete.NucleoInestable ? "INESTABLE" : "NORMAL")}";
 
-        lblMision.Text =
-            $"{mision.Codigo} - {mision.Nombre}\n" +
-            $"Recurso: {(mision.TieneRecurso ? "Recuperado" : "Pendiente")}\n" +
-            $"Anomalía: {(mision.TieneAnalisis ? "Analizada" : "Pendiente")}\n" +
-            $"Estado: {mision.Estado}\n" +
-            "Objetivo final: regresar a la base central.";
+        if (mision == null)
+        {
+            lblEstadoExplorador.Text = "Campaña completada. Puedes revisar el inventario o iniciar otra partida.";
+            lblResumenMision.Text = "Todas las misiones de la campaña inicial están completadas.";
+            txtDetalleMision.Text = "¡Felicidades, cadete! Has completado la campaña inicial de NEXUS.";
+            btnEscanear.Enabled = false;
+            btnRecargar.Enabled = juego.Partida.PosicionActual == 0;
+            btnPurgar.Enabled = false;
+            btnCambiarRealidad.Enabled = false;
+            btnSiguienteMision.Enabled = false;
+        }
+        else
+        {
+            lblEstadoExplorador.Text =
+                $"Cadete: {cadete.Nombre}\n" +
+                $"Realidad: {cadete.RealidadActual} | Nivel de acceso: {cadete.NivelAcceso}\n" +
+                $"Energía: {cadete.Energia}/100 | Estabilidad: {cadete.Estabilidad}/100\n" +
+                $"Núcleo: {(cadete.NucleoInestable ? "Inestable" : "Normal")}";
+
+            lblResumenMision.Text =
+                $"{mision.Codigo} — {mision.Nombre}\n" +
+                $"Realidad requerida: {mision.RealidadObjetivo}\n" +
+                $"{JuegoService.ResumenObjetivos(mision)}\n" +
+                $"Estado: {mision.Estado}";
+
+            btnSiguienteMision.Enabled = mision.Completada;
+            btnEscanear.Enabled =
+                juego.MapaActual[juego.Partida.PosicionActual].Tipo == TipoZona.Anomalia &&
+                !juego.Partida.ZonasExploradas[juego.Partida.PosicionActual];
+            btnRecargar.Enabled = juego.Partida.PosicionActual == 0 &&
+                (cadete.Energia < 100 || cadete.Estabilidad < 100);
+            btnPurgar.Enabled = juego.Partida.PosicionActual == 0 && cadete.NucleoInestable;
+            btnCambiarRealidad.Enabled = juego.Partida.PosicionActual == 0 &&
+                cadete.RealidadActual != mision.RealidadObjetivo;
+
+            var lineas = juego.Partida.Misiones.Select((item, indice) =>
+                $"{item.Codigo} — {item.Nombre}\r\n" +
+                $"Estado: {(indice < juego.Partida.IndiceMisionActual ? "Completada" : item.Estado)}\r\n" +
+                $"Realidad: {item.RealidadObjetivo}\r\n" +
+                $"Objetivo: {item.Descripcion}\r\n" +
+                $"Recompensa: {item.Recompensa}\r\n");
+
+            txtDetalleMision.Text =
+                string.Join("\r\n------------------------------\r\n", lineas) +
+                $"\r\n\r\nMISIÓN ACTUAL: {mision.Codigo}\r\n" +
+                JuegoService.ResumenObjetivos(mision);
+        }
 
         for (int i = 0; i < botonesZonas.Length; i++)
         {
@@ -583,56 +854,25 @@ public class FormularioPrincipal : Form
             string estado = juego.ObtenerEstadoZona(i);
 
             botonesZonas[i].Text = $"{zona.Nombre}\n{estado}";
-
-            if (i == juego.Partida.PosicionActual)
-            {
-                botonesZonas[i].BackColor = Turquesa;
-            }
-            else if (i == zonaSeleccionada)
-            {
-                botonesZonas[i].BackColor = Color.FromArgb(65, 85, 115);
-            }
-            else
-            {
-                botonesZonas[i].BackColor = ColorPanel;
-            }
+            botonesZonas[i].BackColor =
+                i == juego.Partida.PosicionActual ? Color.FromArgb(27, 106, 119) :
+                i == zonaSeleccionada ? Color.FromArgb(65, 85, 115) : PanelClaro;
         }
 
         ZonaInfo seleccion = juego.MapaActual[zonaSeleccionada];
         lblZonaSeleccionada.Text =
             $"Seleccionada: {seleccion.Nombre}\nEstado: {juego.ObtenerEstadoZona(zonaSeleccionada)}";
 
-        btnEscanear.Enabled =
-            juego.MapaActual[juego.Partida.PosicionActual].Tipo == TipoZona.Anomalia &&
-            !juego.Partida.ZonasExploradas[juego.Partida.PosicionActual];
-
-        btnRecargar.Enabled = juego.Partida.PosicionActual == 0;
-        btnPurgar.Enabled = juego.Partida.PosicionActual == 0 && cadete.NucleoInestable;
-
-        txtDetalleMision.Text =
-            $"{mision.Codigo} - {mision.Nombre}\r\n\r\n" +
-            $"{mision.Descripcion}\r\n\r\n" +
-            $"1. Recuperar una celda de energía: {(mision.TieneRecurso ? "COMPLETADO" : "PENDIENTE")}\r\n" +
-            $"2. Analizar una anomalía: {(mision.TieneAnalisis ? "COMPLETADO" : "PENDIENTE")}\r\n" +
-            "3. Regresar a la base central: " +
-            $"{(mision.Completada ? "COMPLETADO" : "PENDIENTE")}\r\n\r\n" +
-            $"Estado: {mision.Estado}\r\n" +
-            $"Nivel de acceso actual: {cadete.NivelAcceso}";
-
         listaInventario.Items.Clear();
-
         foreach (ObjetoInventario objeto in cadete.Inventario.Where(item => item.Cantidad > 0))
-        {
             listaInventario.Items.Add(objeto);
-        }
 
         bool tieneCelda = cadete.Inventario.Any(item =>
             item.Nombre == "Celda de energía" && item.Cantidad > 0);
-
         btnUsarCelda.Enabled = tieneCelda && cadete.Energia < 100;
         lblInventarioAyuda.Text = listaInventario.Items.Count == 0
             ? "Todavía no encontraste objetos."
-            : "Selecciona una celda de energía para recuperar 25 puntos.";
+            : "Una celda recupera 25 puntos de energía. Selecciona una para consultar su cantidad.";
     }
 
     private void MostrarIris(string mensaje)
