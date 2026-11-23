@@ -231,7 +231,7 @@ public class FormularioPrincipal : Form
         Button btnContinuar = CrearBoton("CONTINUAR PARTIDA", ContinuarPartida, 330, 42);
         btnContinuar.SetBounds(28, 387, 330, 42);
 
-        Button btnAjustes = CrearBoton("CONFIGURACIÓN / AYUDA", MostrarAyuda, 158, 38);
+        Button btnAjustes = CrearBoton("CONFIGURACIÓN SQL", ConfigurarSqlServer, 158, 38);
         btnAjustes.SetBounds(28, 445, 158, 38);
 
         Button btnSalir = CrearBoton("SALIR", Salir, 158, 38);
@@ -604,14 +604,22 @@ public class FormularioPrincipal : Form
         MostrarIris($"Bienvenido, {nombre}. MIS-001 está activa. IRIS te guiará durante la exploración.");
     }
 
-    private void ContinuarPartida()
+    private async void ContinuarPartida()
     {
         try
         {
             Partida? partida = GuardadoLocal.Cargar(RanuraElegida);
+
+            if (partida == null && SqlServerRepository.EstaConfigurado &&
+                !string.IsNullOrWhiteSpace(txtNombre.Text))
+            {
+                var repositorioSql = new SqlServerRepository();
+                partida = await repositorioSql.CargarAsync(txtNombre.Text.Trim(), RanuraElegida);
+            }
+
             if (partida == null)
             {
-                MostrarIris("Esta ranura está vacía. Crea una nueva partida o selecciona otra ranura.");
+                MostrarIris("No hay una partida en esta ranura local ni en SQL Server (si está configurado).");
                 return;
             }
 
@@ -676,6 +684,36 @@ public class FormularioPrincipal : Form
             "Ayuda de NEXUS",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
+    }
+
+    private async void ConfigurarSqlServer()
+    {
+        if (!SqlServerRepository.EstaConfigurado)
+        {
+            MessageBox.Show(
+                "SQL Server todavía no está configurado en esta computadora.\n\n" +
+                "1. Ejecuta database/01-esquema.sql en SQL Server Management Studio.\n" +
+                "2. Configura la variable de entorno NEXUS_SQLSERVER_CONNECTION.\n" +
+                "3. Abre Visual Studio desde una terminal que tenga esa variable.\n\n" +
+                "La partida local seguirá funcionando sin SQL Server.",
+                "Configuración de SQL Server",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            var repositorio = new SqlServerRepository();
+            await repositorio.ProbarConexionAsync();
+            MessageBox.Show("Conexión con SQL Server correcta.", "NEXUS",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception error)
+        {
+            MessageBox.Show("No se pudo conectar con SQL Server:\n" + error.Message,
+                "NEXUS - Error de conexión", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
     }
 
     private void Salir()
@@ -754,7 +792,7 @@ public class FormularioPrincipal : Form
             GuardarAutomaticamente();
     }
 
-    private void GuardarPartida()
+    private async void GuardarPartida()
     {
         if (juego == null)
         {
@@ -765,7 +803,17 @@ public class FormularioPrincipal : Form
         try
         {
             GuardadoLocal.Guardar(juego.Partida);
-            MostrarIris($"Partida guardada correctamente en la ranura {juego.Partida.NumeroRanura}.");
+
+            if (SqlServerRepository.EstaConfigurado)
+            {
+                var repositorioSql = new SqlServerRepository();
+                await repositorioSql.GuardarAsync(juego.Partida);
+                MostrarIris($"Partida guardada en este equipo y en SQL Server (ranura {juego.Partida.NumeroRanura}).");
+            }
+            else
+            {
+                MostrarIris($"Partida guardada localmente en la ranura {juego.Partida.NumeroRanura}. SQL Server no está configurado en este equipo.");
+            }
         }
         catch
         {
