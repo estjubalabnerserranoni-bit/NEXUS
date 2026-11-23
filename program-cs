@@ -1,359 +1,315 @@
 using System;
-using System.Threading;
+using System.IO;
 
-namespace NEXUS_v1
+namespace NEXUS_v1;
+
+class Explorador
 {
-    class Program
+    public string Nombre { get; }
+    public int Edad { get; }
+    public string RealidadActual { get; }
+    public int Energia { get; private set; } = 100;
+    public int Estabilidad { get; private set; } = 100;
+    public int NivelAcceso { get; private set; } = 1;
+    public bool NucleoInestable { get; private set; }
+
+    public Explorador(string nombre, int edad, string realidad)
     {
-        static string nombreCadete = "Sin Registrar";
-        static int edadCadete = 0;
-        static string realidadAsignada = "Ninguna";
+        Nombre = nombre;
+        Edad = edad;
+        RealidadActual = realidad;
+    }
 
-        static int energia = 100;
-        static int estabilidadConexion = 100;
-        static bool sistemaInestable = false;
-        static bool sesionActiva = true;
-
-        static string[] moduloEntrenamiento = { "Escaneo", "Estabilizador", "Extractor", "Sobrecarga" };
-
-        static int[,] mapaRealidadAlfa = {
-            { 1, 0, 0 },
-            { 0, 3, 0 },
-            { 0, 2, 0 }
-        };
-
-        static int[,] mapaRealidadBeta = {
-            { 1, 2, 0 },
-            { 0, 0, 3 },
-            { 2, 0, 2 }
-        };
-
-        static void Main(string[] args)
+    public bool GastarEnergia(int costo)
+    {
+        if (Energia < costo)
         {
-            Console.Clear();
-            MostrarEncabezado("SISTEMA CENTRAL NEXUS v1.0");
-
-            RegistrarCadete();
-
-            if (energia >= 50 && estabilidadConexion >= 50)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\n[INMERSIÓN AUTORIZADA] Conexión estable con NEXUS.");
-                Console.ResetColor();
-                Thread.Sleep(1500);
-
-                while (sesionActiva)
-                {
-                    VerificarSituacionCriticaIRIS();
-
-                    MostrarMenuPrincipal();
-                    string opcion = Console.ReadLine();
-                    ProcesarOpcionMenu(opcion);
-                }
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\n[INMERSIÓN RECHAZADA] Parámetros insuficientes.");
-                Console.ResetColor();
-            }
-
-            MostrarEncabezado("CERRANDO TRANSMISIÓN NEXUS v1.0");
+            Console.WriteLine($"IRIS: necesitas {costo} de energía y tienes {Energia}.");
+            return false;
         }
 
-        static void RegistrarCadete()
+        Energia -= costo;
+        return true;
+    }
+
+    public void DetectarAnomaliaCritica()
+    {
+        Estabilidad = Math.Max(0, Estabilidad - 20);
+        NucleoInestable = true;
+    }
+
+    public void RecargarEnergia()
+    {
+        Energia = Math.Min(100, Energia + 30);
+        Estabilidad = Math.Min(100, Estabilidad + 10);
+        Console.WriteLine($"Recarga finalizada. Energía: {Energia}% | Estabilidad: {Estabilidad}%");
+    }
+
+    public void PurgarNucleo()
+    {
+        NucleoInestable = false;
+        Console.WriteLine("IRIS: núcleo estabilizado.");
+    }
+
+    public void RevisarEmergencia()
+    {
+        if (Energia < 20 && Estabilidad < 20 && NucleoInestable)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("--- PROTOCOLO DE REGISTRO ---");
-            Console.ResetColor();
+            Energia = 50;
+            Estabilidad = 50;
+            NucleoInestable = false;
+            Console.WriteLine("IRIS: purga de emergencia. Energía y estabilidad recuperadas al 50%.");
+        }
+        else if (Energia < 20 || Estabilidad < 20)
+        {
+            Console.WriteLine("IRIS: recursos bajos. Revisa tu estado antes de continuar.");
+        }
+    }
 
-            Console.Write("Ingrese Nombre del Cadete: ");
-            nombreCadete = Console.ReadLine();
+    public void SubirNivel() => NivelAcceso++;
 
-            Console.Write("Ingrese Edad del Cadete: ");
-            if (!int.TryParse(Console.ReadLine(), out edadCadete))
-            {
-                edadCadete = 18; 
-            }
+    public void MostrarEstado()
+    {
+        Console.WriteLine($"\nCadete: {Nombre} | Edad: {Edad} | Acceso: nivel {NivelAcceso}");
+        Console.WriteLine($"Destino: {RealidadActual}");
+        Console.WriteLine($"Energía: {Energia}% | Estabilidad: {Estabilidad}%");
+        Console.WriteLine("Núcleo: " + (NucleoInestable ? "Inestable" : "Normal"));
+    }
+}
 
-            Console.WriteLine("\nSeleccione Realidad Asignada:");
-            Console.WriteLine("1. Realidad Alfa (Bajo peligro)");
-            Console.WriteLine("2. Realidad Beta (Anomalías elevadas)");
-            Console.Write("Opción: ");
-            string eleccion = Console.ReadLine();
+class Mision
+{
+    public string CodigoMision { get; } = "MIS-001";
+    public string Descripcion { get; } = "Recuperar un recurso, analizar una anomalía y volver a la base.";
+    public string Estado { get; private set; } = "Pendiente";
+    public bool RecursoRecuperado { get; private set; }
+    public bool AnomaliaAnalizada { get; private set; }
 
-            if (eleccion == "2")
-            {
-                realidadAsignada = "Realidad Beta";
-            }
-            else
-            {
-                realidadAsignada = "Realidad Alfa";
-            }
+    public void IniciarMision()
+    {
+        Estado = "En curso";
+        Console.WriteLine($"\n{CodigoMision} | {Descripcion}");
+    }
 
-            Console.WriteLine($"\nCadete {nombreCadete} registrado con éxito en {realidadAsignada}.");
+    public void RegistrarRecurso() => RecursoRecuperado = true;
+    public void RegistrarAnalisis() => AnomaliaAnalizada = true;
+
+    public void MostrarObjetivos()
+    {
+        Console.WriteLine($"\n{CodigoMision} | Estado: {Estado}");
+        Console.WriteLine($"[{(RecursoRecuperado ? "X" : " ")}] Recuperar un recurso.");
+        Console.WriteLine($"[{(AnomaliaAnalizada ? "X" : " ")}] Analizar una anomalía.");
+        Console.WriteLine($"[{(Estado == "Completada" ? "X" : " ")}] Entregar los hallazgos en la base.");
+    }
+
+    public void CompletarMision(Explorador cadete)
+    {
+        if (Estado == "Completada")
+        {
+            Console.WriteLine("Esta misión ya fue entregada.");
+            return;
         }
 
-        static void ConsultarEstado()
+        if (!RecursoRecuperado || !AnomaliaAnalizada)
         {
-            MostrarEncabezado("ESTADO GENERAL DEL SISTEMA");
-            Console.WriteLine($"Cadete: {nombreCadete} | Edad: {edadCadete}");
-            Console.WriteLine($"Realidad Actual: {realidadAsignada}");
-
-            Console.Write("Energía: [");
-            int barras = energia / 10;
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            for (int i = 0; i < 10; i++)
-            {
-                if (i < barras) Console.Write("█");
-                else Console.Write("░");
-            }
-            Console.ResetColor();
-            Console.WriteLine($"] {energia}%");
-
-            Console.WriteLine($"Estabilidad de Conexión: {estabilidadConexion}%");
-            Console.WriteLine($"Estado de Núcleo: {(sistemaInestable ? "INESTABLE" : "NORMAL")}");
-
-            Console.WriteLine("\nMódulos de Equipamiento disponibles:");
-            for (int i = 0; i < moduloEntrenamiento.Length; i++)
-            {
-                Console.WriteLine($" - [{i + 1}] {moduloEntrenamiento[i]}");
-            }
-
-            Pausar();
+            Console.WriteLine("IRIS: todavía quedan objetivos pendientes.");
+            MostrarObjetivos();
+            return;
         }
 
-        static void RecuperarEnergia()
+        Estado = "Completada";
+        cadete.SubirNivel();
+        Console.WriteLine($"MISIÓN COMPLETADA. {cadete.Nombre} obtiene acceso de nivel {cadete.NivelAcceso}.");
+    }
+}
+
+class Program
+{
+    // B = base, A = anomalía, R = recurso, . = sector vacío.
+    static readonly char[,] alfa =
+    {
+        { 'B', '.', '.' },
+        { '.', 'R', '.' },
+        { '.', 'A', '.' }
+    };
+
+    static readonly char[,] beta =
+    {
+        { 'B', 'A', '.' },
+        { '.', '.', 'R' },
+        { 'A', '.', 'A' }
+    };
+
+    static void Main()
+    {
+        try { Jugar(); }
+        catch (EndOfStreamException) { Console.WriteLine("\nTransmisión finalizada."); }
+    }
+
+    static void Jugar()
+    {
+        Console.WriteLine("========== NEXUS | AÑO 2297 ==========");
+        string nombre;
+        do
         {
-            MostrarEncabezado("RECARGA DE ENERGÍA DE NÚCLEO");
-            if (energia < 100)
-            {
-                energia += 30;
-                if (energia > 100) energia = 100;
+            Console.Write("Nombre del cadete: ");
+            nombre = LeerTexto();
+        } while (nombre.Length == 0);
 
-                estabilidadConexion += 10;
-                if (estabilidadConexion > 100) estabilidadConexion = 100;
+        int edad = LeerNumero("Edad", 1, 120);
+        Console.WriteLine("1. Realidad Alfa     2. Realidad Beta");
+        int destino = LeerNumero("Elige una realidad", 1, 2);
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Energía y conexión recargadas con éxito.");
-            }
-            else
-            {
-                Console.WriteLine("La energía ya se encuentra al máximo.");
-            }
-            Console.ResetColor();
-            Pausar();
-        }
+        Explorador cadete = new Explorador(nombre, edad, destino == 1 ? "Alfa" : "Beta");
+        char[,] mapa = (char[,])(destino == 1 ? alfa : beta).Clone();
+        int fila = 0, columna = 0;
+        Mision mision = new Mision();
+        mision.IniciarMision();
 
-        static void AnalizarAnomalia()
+        while (true)
         {
-            MostrarEncabezado("ANÁLISIS DE ANOMALÍAS DE REALIDAD");
+            Console.WriteLine($"\n--- NEXUS | {cadete.Nombre} | Energía: {cadete.Energia}% ---");
+            Console.WriteLine("1. Ver mapa y explorar");
+            Console.WriteLine("2. Escanear anomalía del sector actual");
+            Console.WriteLine("3. Consultar estado y misión");
+            Console.WriteLine("4. Recargar energía");
+            Console.WriteLine("5. Terminal IRIS");
+            Console.WriteLine("6. Salir");
 
-            Console.Write("Seleccione el nivel de frecuencia a escanear (1-100): ");
-            int.TryParse(Console.ReadLine(), out int frecuencia);
-
-            Console.Write("Escaneando");
-            for (int i = 0; i < 3; i++)
+            switch (LeerNumero("Opción", 1, 6))
             {
-                Thread.Sleep(300);
-                Console.Write(".");
-            }
-            Console.WriteLine();
-
-            if (frecuencia > 80)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("-> RESULTADO: Anomalía Crítica Detectada. Absorción de energía inminente.");
-                energia -= 20;
-                sistemaInestable = true;
-            }
-            else if (frecuencia >= 40 && frecuencia <= 80)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("-> RESULTADO: Anomalía Estable. Datos procesados sin pérdidas.");
-                energia -= 5;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("-> RESULTADO: Señal Débil. No se registraron alteraciones.");
-            }
-            Console.ResetColor();
-            Pausar();
-        }
-
-        static void VerificarSituacionCriticaIRIS()
-        {
-            if (energia < 20 || estabilidadConexion < 20)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\n==================================================");
-                Console.WriteLine(" [ALERTA DE SEGURIDAD IRIS] ");
-                Console.WriteLine(" Crítico: Nivel de recursos bajo mínimas de seguridad.");
-                Console.WriteLine("==================================================");
-                Console.ResetColor();
-
-                if (energia < 20 && estabilidadConexion < 20 && sistemaInestable)
-                {
-                    Console.ForegroundColor = ConsoleColor.Magenta;
-                    Console.WriteLine("[NIVEL ÉLITE] IRIS ejecuta purga de emergencia.");
-                    energia = 50;
-                    estabilidadConexion = 50;
-                    sistemaInestable = false;
-                    Console.WriteLine("-> Estado estabilizado forzosamente.");
-                    Console.ResetColor();
-                }
-            }
-        }
-
-        static void ComunicacionIRIS()
-        {
-            MostrarEncabezado("CONSOLA DE COMUNICACIÓN IRIS");
-            Console.WriteLine("IRIS: 'Cadete, estoy monitoreando la estructura de la realidad.'");
-            Console.WriteLine("Opciones de interacción:");
-            Console.WriteLine("1. Solicitar diagnóstico");
-            Console.WriteLine("2. Forzar purga de errores");
-            Console.Write("Selección: ");
-            string resp = Console.ReadLine();
-
-            if (resp == "1")
-            {
-                Console.WriteLine($"IRIS: 'Energía al {energia}%. Recomendación: Mantener estabilidad.'");
-            }
-            else if (resp == "2")
-            {
-                sistemaInestable = false;
-                Console.WriteLine("IRIS: 'Errores purgados. Sistema inestable desmarcado.'");
-            }
-            else
-            {
-                Console.WriteLine("IRIS: 'Comando no reconocido.'");
-            }
-            Pausar();
-        }
-
-        static void ExplorarRealidadMapas()
-        {
-            MostrarEncabezado("EXPLORACIÓN DE MAPA DE REALIDAD");
-
-            int[,] mapaSeleccionado;
-            if (realidadAsignada == "Realidad Beta")
-            {
-                mapaSeleccionado = mapaRealidadBeta;
-            }
-            else
-            {
-                mapaSeleccionado = mapaRealidadAlfa;
-            }
-
-            Console.WriteLine($"Renderizando Sector: {realidadAsignada}\n");
-
-            Console.WriteLine("Leyenda: [P] Jugador | [A] Anomalía | [R] Recurso | [.] Vacío\n");
-
-            for (int fila = 0; fila < 3; fila++)
-            {
-                Console.Write("\t");
-                for (int col = 0; col < 3; col++)
-                {
-                    int celda = mapaSeleccionado[fila, col];
-
-                    switch (celda)
-                    {
-                        case 1:
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.Write("[P] ");
-                            break;
-                        case 2:
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.Write("[A] ");
-                            break;
-                        case 3:
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.Write("[R] ");
-                            break;
-                        default:
-                            Console.ForegroundColor = ConsoleColor.Gray;
-                            Console.Write("[.] ");
-                            break;
-                    }
-                    Console.ResetColor();
-                }
-                Console.WriteLine();
-            }
-
-            energia -= 10;
-            Console.WriteLine("\nExploración completada. Energía consumida: -10%");
-            Pausar();
-        }
-
-        static void MostrarMenuPrincipal()
-        {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("==================================================");
-            Console.WriteLine($"        NEXUS v1.0 | CADETE: {nombreCadete.ToUpper()}");
-            Console.WriteLine("==================================================");
-            Console.ResetColor();
-            Console.WriteLine("1. Explorar Mapa de Realidades (Matriz)");
-            Console.WriteLine("2. Analizar Anomalía (Misión 02)");
-            Console.WriteLine("3. Consultar Estado y Módulos");
-            Console.WriteLine("4. Recargar Energía del Sistema");
-            Console.WriteLine("5. Terminal de Comunicación IRIS");
-            Console.WriteLine("6. Desconexión Controlada (Salir)");
-            Console.Write("\nSeleccione una opción (1-6): ");
-        }
-
-        static void ProcesarOpcionMenu(string opcion)
-        {
-            switch (opcion)
-            {
-                case "1":
-                    ExplorarRealidadMapas();
+                case 1:
+                    Explorar(mapa, cadete, mision, ref fila, ref columna);
                     break;
-                case "2":
-                    AnalizarAnomalia();
+                case 2:
+                    Escanear(mapa, cadete, mision, fila, columna);
                     break;
-                case "3":
-                    ConsultarEstado();
+                case 3:
+                    cadete.MostrarEstado();
+                    mision.MostrarObjetivos();
                     break;
-                case "4":
-                    RecuperarEnergia();
+                case 4:
+                    cadete.RecargarEnergia();
                     break;
-                case "5":
-                    ComunicacionIRIS();
+                case 5:
+                    TerminalIRIS(cadete, mision);
                     break;
-                case "6":
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("\nIniciando desconexión segura...");
-                    sesionActiva = false; 
-                    Thread.Sleep(1000);
-                    break;
-                default:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("\nOpción inválida. Intente de nuevo.");
-                    Console.ResetColor();
-                    Pausar();
-                    break;
+                case 6:
+                    Console.WriteLine($"Desconexión segura. Hasta pronto, {cadete.Nombre}.");
+                    return;
             }
+            cadete.RevisarEmergencia();
         }
+    }
 
-        static void MostrarEncabezado(string titulo)
+    static void Explorar(char[,] mapa, Explorador cadete, Mision mision,
+                         ref int fila, ref int columna)
+    {
+        Console.WriteLine($"\nMapa de la realidad {cadete.RealidadActual}");
+        Console.WriteLine("B: base | R: recurso | A: anomalía | .: vacío | X: explorado");
+        Console.WriteLine("Los corchetes indican tu posición.\n      1  2  3");
+
+        for (int f = 0; f < 3; f++)
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("==================================================");
-            Console.WriteLine($"  {titulo}");
-            Console.WriteLine("==================================================");
-            Console.ResetColor();
+            Console.Write($"  {f + 1}  ");
+            for (int c = 0; c < 3; c++)
+            {
+                char sector = mapa[f, c];
+                Console.Write(f == fila && c == columna ? $"[{sector}]" : $" {sector} ");
+            }
             Console.WriteLine();
         }
 
-        static void Pausar()
+        int nuevaFila = LeerNumero("Fila de destino (0 para volver)", 0, 3);
+        if (nuevaFila == 0) return;
+        nuevaFila--;
+        int nuevaColumna = LeerNumero("Columna de destino", 1, 3) - 1;
+
+        if (nuevaFila == fila && nuevaColumna == columna)
         {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("\nPresione cualquier tecla para continuar...");
-            Console.ResetColor();
-            Console.ReadKey();
+            Console.WriteLine("Ya estás en ese sector.");
+            return;
+        }
+        if (!cadete.GastarEnergia(10)) return;
+
+        fila = nuevaFila;
+        columna = nuevaColumna;
+        switch (mapa[fila, columna])
+        {
+            case 'B':
+                Console.WriteLine("Llegaste a la base.");
+                mision.CompletarMision(cadete);
+                break;
+            case 'R':
+                mision.RegistrarRecurso();
+                mapa[fila, columna] = 'X';
+                Console.WriteLine("Recurso recuperado y registrado en la misión.");
+                break;
+            case 'A':
+                Console.WriteLine("Anomalía localizada. Usa la opción 2 para escanearla.");
+                break;
+            case 'X':
+                Console.WriteLine("Este sector ya fue investigado.");
+                break;
+            default:
+                Console.WriteLine("Sector vacío. No se encontraron hallazgos.");
+                break;
+        }
+    }
+
+    static void Escanear(char[,] mapa, Explorador cadete, Mision mision, int fila, int columna)
+    {
+        if (mapa[fila, columna] != 'A')
+        {
+            Console.WriteLine("No hay una anomalía pendiente aquí. Busca una A en el mapa.");
+            return;
+        }
+
+        int frecuencia = LeerNumero("Frecuencia del escáner", 1, 100);
+        if (frecuencia < 40)
+        {
+            Console.WriteLine("Señal débil. Prueba otra frecuencia. Energía consumida: 0.");
+            return;
+        }
+
+        bool critica = frecuencia > 80;
+        int costo = critica ? 20 : 5;
+        if (!cadete.GastarEnergia(costo)) return;
+
+        if (critica) cadete.DetectarAnomaliaCritica();
+        mision.RegistrarAnalisis();
+        mapa[fila, columna] = 'X';
+        Console.WriteLine(critica
+            ? "Anomalía crítica registrada. Energía -20, estabilidad -20."
+            : "Anomalía estable registrada. Energía -5.");
+    }
+
+    static void TerminalIRIS(Explorador cadete, Mision mision)
+    {
+        Console.WriteLine("\nIRIS | 1. Diagnóstico   2. Purgar núcleo   3. Volver");
+        int opcion = LeerNumero("Comando", 1, 3);
+        if (opcion == 1)
+        {
+            cadete.MostrarEstado();
+            mision.MostrarObjetivos();
+        }
+        else if (opcion == 2)
+        {
+            cadete.PurgarNucleo();
+        }
+    }
+
+    static string LeerTexto() =>
+        Console.ReadLine()?.Trim() ?? throw new EndOfStreamException();
+
+    static int LeerNumero(string mensaje, int minimo, int maximo)
+    {
+        while (true)
+        {
+            Console.Write($"{mensaje} [{minimo}-{maximo}]: ");
+            if (int.TryParse(LeerTexto(), out int numero) && numero >= minimo && numero <= maximo)
+                return numero;
+            Console.WriteLine("Entrada inválida. Escribe un número dentro del rango.");
         }
     }
 }
