@@ -1,4 +1,4 @@
-name: Compilar NEXUS Windows Forms
+name: Compilar y probar NEXUS
 
 on:
   push:
@@ -7,17 +7,23 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: windows-latest
 
     steps:
       - name: Descargar el repositorio
         uses: actions/checkout@v4
 
-      - name: Instalar .NET 10
+      - name: Instalar .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 8.0.x
 
-      - name: Compilar la solución
-        run: dotnet build NEXUS.sln --configuration Release
+      - name: Restaurar paquetes
+        run: dotnet restore NEXUS.sln
+
+      - name: Compilar solución y pruebas
+        run: dotnet build NEXUS.sln --configuration Release --no-restore
+
+      - name: Ejecutar pruebas de reglas del juego
+        run: dotnet run --project tests/NEXUS.Tests/NEXUS.Tests.csproj --configuration Release --no-build
