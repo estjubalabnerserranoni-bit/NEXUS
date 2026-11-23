@@ -126,7 +126,8 @@ public class JuegoService
                     return new(true, "Este depósito ya fue revisado.");
 
                 // Un recurso reservado para otra misión no se consume antes de tiempo.
-                if (Cadete.RealidadActual != mision.RealidadObjetivo ||
+                if (!mision.RequiereRecurso ||
+                    Cadete.RealidadActual != mision.RealidadObjetivo ||
                     (mision.SectorRecursoObjetivo >= 0 && destino != mision.SectorRecursoObjetivo))
                     return new(true, "Depósito localizado. IRIS lo reservará para la misión que tenga ese objetivo.");
 
