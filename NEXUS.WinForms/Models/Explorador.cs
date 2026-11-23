@@ -77,4 +77,5 @@ public class Explorador
         objeto.Cantidad--;
         mensaje = "Usaste una celda y recuperaste 25 puntos de energía.";
         return true;
-    }}
+    }
+}
