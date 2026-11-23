@@ -283,7 +283,7 @@ Estas funciones no son necesarias para demostrar la primera versión gráfica y 
 
 - El punto de partida es el código C# de H3; no se debe sustituir por un proyecto sin relación con el original.
 - La siguiente versión se orientará a una aplicación de escritorio con Windows Forms y SQL Server.
-- El diseño no significa que Windows Forms, SQL Server o las pantallas ya estén programadas: son objetivos de evolución.
+- La primera interfaz de Windows Forms y el guardado local en JSON ya cuentan con un prototipo organizado en `NEXUS.WinForms`. SQL Server, el menú principal independiente y las funciones ampliadas siguen siendo parte de la evolución pendiente.
 - La lógica que decide el costo de energía, el resultado de la exploración y el estado de las misiones debe residir en la lógica del juego, no depender únicamente de la interfaz.
 - El acceso a SQL Server deberá estar separado de las pantallas y manejar errores de conexión sin cerrar inesperadamente el juego.
 - No se deben guardar contraseñas de conexión directamente en archivos públicos del repositorio.
@@ -293,6 +293,20 @@ Estas funciones no son necesarias para demostrar la primera versión gráfica y 
 ### Criterio de finalización de la primera etapa gráfica
 
 La primera etapa podrá considerarse demostrable cuando el usuario pueda iniciar el juego, identificar al cadete, consultar el mapa y la misión, explorar una zona con validación de energía, recibir mensajes claros, consultar su inventario y volver al menú sin errores inesperados. La persistencia con SQL Server se probará cuando sea implementada, mediante pruebas de guardar, cerrar, volver a abrir y recuperar el progreso.
+
+---
+
+## Implementación disponible en este repositorio
+
+Se agregó una primera versión organizada de Windows Forms para probar el ciclo central descrito en este diseño:
+
+- **Solución para Visual Studio:** [NEXUS.sln](NEXUS.sln).
+- **Proyecto de Windows Forms:** [NEXUS.WinForms](NEXUS.WinForms/README.md).
+- **Estado de implementación:** [docs/estado-implementacion.md](docs/estado-implementacion.md).
+
+La versión actual incluye mapa de sectores, realidades Alfa y Beta, energía, estabilidad, escaneo de anomalías, misión MIS-001, inventario, mensajes de IRIS y guardado local. SQL Server todavía no está conectado; se mantiene como la siguiente etapa, tal como se explica en la arquitectura y el modelo de datos.
+
+**Nota de ejecución:** abre `NEXUS.sln` en Visual Studio 2022 actualizado, con el SDK de .NET 10 y la carga de trabajo **Desarrollo de escritorio de .NET**.
 
 ---
 
