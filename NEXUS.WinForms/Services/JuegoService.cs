@@ -125,12 +125,12 @@ public class JuegoService
                 if (Partida.ZonasExploradas[destino])
                     return new(true, "Este depósito ya fue revisado.");
 
-                Partida.ZonasExploradas[destino] = true;
-
+                // Un recurso reservado para otra misión no se consume antes de tiempo.
                 if (Cadete.RealidadActual != mision.RealidadObjetivo ||
                     (mision.SectorRecursoObjetivo >= 0 && destino != mision.SectorRecursoObjetivo))
-                    return new(true, "Encontraste un recurso, pero no corresponde al objetivo de esta misión.");
+                    return new(true, "Depósito localizado. IRIS lo reservará para la misión que tenga ese objetivo.");
 
+                Partida.ZonasExploradas[destino] = true;
                 mision.TieneRecurso = true;
                 Cadete.AgregarObjeto("Celda de energía", "Permite recuperar 25 puntos de energía.");
                 return new(true, "Recurso recuperado. Se añadió una celda de energía al inventario.");
