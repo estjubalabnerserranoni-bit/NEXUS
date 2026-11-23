@@ -47,3 +47,18 @@ Crear la interfaz en Windows Forms con el flujo central operativo (perfil, mapa,
 Separar la lógica del juego de los eventos visuales de los botones.
 Fuera del Alcance Inicial (Futuro): Animaciones complejas, efectos de sonido avanzados, generación procedural avanzada, IA compleja de enemigos o multijugador.
 Seguridad y Persistencia: El uso de SQL Server y el guardado de partidas se integrarán de forma robusta en una fase posterior, evitando credenciales hardcodeadas y manejando errores de conexión de manera segura.
+
+ 
+## 6. Estado de implementación de la propuesta
+
+La primera versión gráfica organizada se encuentra en la solución `NEXUS.sln` y el proyecto `NEXUS.WinForms`. Esta versión incluye un menú de acceso, tres ranuras de guardado, mapa de nueve sectores, progreso separado para Alfa y Beta, pantallas de exploración, misiones e inventario y mensajes del sistema IRIS.
+
+La campaña inicial incluye cinco misiones: Primer contacto, Señal desconocida, Núcleo perdido, Ruptura dimensional y El origen de NEXUS. Las misiones tienen objetivos concretos, como recuperar recursos, analizar sectores específicos, realizar una lectura crítica, purgar el núcleo y regresar a la base.
+
+El guardado local en JSON está implementado. También se añadió el acceso a SQL Server mediante `SqlServerRepository` y el script `database/01-esquema.sql`. La conexión real necesita que cada computadora ejecute el script y configure su propia variable de entorno; no se incluye una contraseña en el repositorio.
+
+## 7. Funciones para futuras versiones
+
+La versión actual es una primera campaña jugable y una base de Windows Forms. Todavía se pueden mejorar los gráficos del mapa, agregar ilustraciones de las realidades, incorporar efectos de sonido, aumentar el catálogo de objetos y crear nuevas campañas. Estas mejoras no deben confundirse con funciones ya terminadas.
+
+Para abrir el proyecto se debe utilizar `NEXUS.sln` desde Visual Studio 2022 17.8 o posterior, con .NET 8 y la carga de trabajo de desarrollo de escritorio. La guía completa está en `docs/guia-clonado-y-ejecucion.md`.
