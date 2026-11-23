@@ -10,7 +10,7 @@ namespace NexusJuegoForms.Forms;
 public class FormularioPrincipal : Form
 {
     private static readonly Color Fondo = Color.FromArgb(12, 20, 36);
-    private static readonly Color Panel = Color.FromArgb(24, 39, 62);
+    private static readonly Color FondoPanel = Color.FromArgb(24, 39, 62);
     private static readonly Color PanelClaro = Color.FromArgb(34, 55, 82);
     private static readonly Color Cian = Color.FromArgb(77, 211, 219);
     private static readonly Color Texto = Color.FromArgb(236, 244, 252);
@@ -89,7 +89,7 @@ public class FormularioPrincipal : Form
 
         lblIris.Dock = DockStyle.Bottom;
         lblIris.Height = 48;
-        lblIris.BackColor = Panel;
+        lblIris.BackColor = FondoPanel;
         lblIris.ForeColor = Cian;
         lblIris.TextAlign = ContentAlignment.MiddleLeft;
         lblIris.Padding = new Padding(18, 4, 12, 4);
@@ -171,7 +171,7 @@ public class FormularioPrincipal : Form
         Panel tarjeta = new()
         {
             Dock = DockStyle.Fill,
-            BackColor = Panel,
+            BackColor = FondoPanel,
             Padding = new Padding(26)
         };
 
@@ -198,7 +198,7 @@ public class FormularioPrincipal : Form
         txtNombre.SetBounds(28, 145, 330, 34);
         txtNombre.MaxLength = 35;
         txtNombre.Font = new Font("Segoe UI", 11);
-        txtNombre.BackColor = PanelClaro;
+        txtNombre.BackColor = FondoPanelClaro;
         txtNombre.ForeColor = Texto;
         txtNombre.BorderStyle = BorderStyle.FixedSingle;
 
@@ -208,7 +208,7 @@ public class FormularioPrincipal : Form
         cmbRealidad.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbRealidad.Items.AddRange(new object[] { "Alfa", "Beta" });
         cmbRealidad.SelectedIndex = 0;
-        cmbRealidad.BackColor = PanelClaro;
+        cmbRealidad.BackColor = FondoPanelClaro;
         cmbRealidad.ForeColor = Texto;
 
         Label lblSlot = CrearEtiqueta("Ranura de partida", 10);
@@ -217,7 +217,7 @@ public class FormularioPrincipal : Form
         cmbRanura.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbRanura.Items.AddRange(new object[] { "1", "2", "3" });
         cmbRanura.SelectedIndex = 0;
-        cmbRanura.BackColor = PanelClaro;
+        cmbRanura.BackColor = FondoPanelClaro;
         cmbRanura.ForeColor = Texto;
         cmbRanura.SelectedIndexChanged += (_, _) => CargarInformacionRanura();
 
@@ -265,7 +265,7 @@ public class FormularioPrincipal : Form
         FlowLayoutPanel encabezado = new()
         {
             Dock = DockStyle.Fill,
-            BackColor = Panel,
+            BackColor = FondoPanel,
             Padding = new Padding(12, 9, 8, 5),
             WrapContents = false
         };
@@ -307,6 +307,7 @@ public class FormularioPrincipal : Form
         SplitContainer split = new()
         {
             Dock = DockStyle.Fill,
+            Size = new Size(1000, 600),
             Orientation = Orientation.Vertical,
             SplitterDistance = 560,
             BackColor = Fondo
@@ -389,7 +390,7 @@ public class FormularioPrincipal : Form
         lblEstadoExplorador.AutoSize = false;
         lblEstadoExplorador.Width = 390;
         lblEstadoExplorador.Height = 95;
-        lblEstadoExplorador.BackColor = Panel;
+        lblEstadoExplorador.BackColor = FondoPanel;
         lblEstadoExplorador.Padding = new Padding(10);
         acciones.Controls.Add(lblEstadoExplorador);
 
@@ -400,7 +401,7 @@ public class FormularioPrincipal : Form
         lblResumenMision.AutoSize = false;
         lblResumenMision.Width = 390;
         lblResumenMision.Height = 115;
-        lblResumenMision.BackColor = Panel;
+        lblResumenMision.BackColor = FondoPanel;
         lblResumenMision.Padding = new Padding(10);
         acciones.Controls.Add(lblResumenMision);
 
@@ -454,7 +455,7 @@ public class FormularioPrincipal : Form
         txtDetalleMision.Dock = DockStyle.Fill;
         txtDetalleMision.Multiline = true;
         txtDetalleMision.ReadOnly = true;
-        txtDetalleMision.BackColor = Panel;
+        txtDetalleMision.BackColor = FondoPanel;
         txtDetalleMision.ForeColor = Texto;
         txtDetalleMision.BorderStyle = BorderStyle.None;
         txtDetalleMision.Font = new Font("Segoe UI", 12);
@@ -501,7 +502,7 @@ public class FormularioPrincipal : Form
         layout.Controls.Add(titulo, 0, 0);
 
         listaInventario.Dock = DockStyle.Fill;
-        listaInventario.BackColor = Panel;
+        listaInventario.BackColor = FondoPanel;
         listaInventario.ForeColor = Texto;
         listaInventario.Font = new Font("Segoe UI", 11);
         layout.Controls.Add(listaInventario, 0, 1);
