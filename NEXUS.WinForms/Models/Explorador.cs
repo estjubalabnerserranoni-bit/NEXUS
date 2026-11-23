@@ -50,15 +50,20 @@ public class Explorador
         }
     }
 
-    public bool UsarCeldaEnergia(out string mensaje)
+    public bool UsarObjeto(string nombre, out string mensaje)
     {
-        ObjetoInventario? celda = Inventario
-            .FirstOrDefault(item =>
-                item.Nombre == "Celda de energía" && item.Cantidad > 0);
+        ObjetoInventario? objeto = Inventario.FirstOrDefault(item =>
+            item.Nombre == nombre && item.Cantidad > 0);
 
-        if (celda == null)
+        if (objeto == null)
         {
-            mensaje = "No tienes una celda de energía en el inventario.";
+            mensaje = "Ese objeto no está disponible en el inventario.";
+            return false;
+        }
+
+        if (objeto.Nombre != "Celda de energía")
+        {
+            mensaje = "Este objeto es un material de investigación y no se puede consumir.";
             return false;
         }
 
@@ -69,9 +74,7 @@ public class Explorador
         }
 
         Energia = Math.Min(100, Energia + 25);
-        celda.Cantidad--;
-
+        objeto.Cantidad--;
         mensaje = "Usaste una celda y recuperaste 25 puntos de energía.";
         return true;
-    }
-}
+    }}
