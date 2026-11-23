@@ -10,7 +10,7 @@ namespace NexusJuegoForms.Forms;
 public class FormularioPrincipal : Form
 {
     private readonly Color Fondo = Color.FromArgb(16, 26, 43);
-    private readonly Color Panel = Color.FromArgb(32, 50, 74);
+    private readonly Color ColorPanel = Color.FromArgb(32, 50, 74);
     private readonly Color Turquesa = Color.FromArgb(36, 106, 111);
     private readonly Color Texto = Color.White;
 
@@ -23,6 +23,7 @@ public class FormularioPrincipal : Form
     private readonly Label lblZonaSeleccionada = new();
     private readonly Label lblIris = new();
     private readonly Label lblInventarioAyuda = new();
+    private readonly TextBox txtDetalleMision = new();
 
     private readonly NumericUpDown numFrecuencia = new();
     private readonly Button btnEscanear = new();
@@ -100,7 +101,7 @@ public class FormularioPrincipal : Form
             Dock = DockStyle.Fill,
             WrapContents = false,
             FlowDirection = FlowDirection.LeftToRight,
-            BackColor = Panel,
+            BackColor = ColorPanel,
             Padding = new Padding(10, 12, 5, 5)
         };
 
@@ -131,7 +132,7 @@ public class FormularioPrincipal : Form
         principal.Controls.Add(pestanas, 0, 2);
 
         lblIris.Dock = DockStyle.Fill;
-        lblIris.BackColor = Panel;
+        lblIris.BackColor = ColorPanel;
         lblIris.ForeColor = Color.FromArgb(180, 235, 235);
         lblIris.TextAlign = ContentAlignment.MiddleLeft;
         lblIris.Padding = new Padding(12, 5, 8, 5);
@@ -151,6 +152,7 @@ public class FormularioPrincipal : Form
         SplitContainer division = new()
         {
             Dock = DockStyle.Fill,
+            Size = new Size(1000, 600),
             SplitterDistance = 570,
             BackColor = Fondo,
             BorderStyle = BorderStyle.None
@@ -240,7 +242,7 @@ public class FormularioPrincipal : Form
         lblEstado.AutoSize = false;
         lblEstado.Width = 390;
         lblEstado.Height = 105;
-        lblEstado.BackColor = Panel;
+        lblEstado.BackColor = ColorPanel;
         lblEstado.Padding = new Padding(10);
         controles.Controls.Add(lblEstado);
 
@@ -251,7 +253,7 @@ public class FormularioPrincipal : Form
         lblMision.AutoSize = false;
         lblMision.Width = 390;
         lblMision.Height = 115;
-        lblMision.BackColor = Panel;
+        lblMision.BackColor = ColorPanel;
         lblMision.Padding = new Padding(10);
         controles.Controls.Add(lblMision);
 
@@ -295,20 +297,16 @@ public class FormularioPrincipal : Form
         titulo.Dock = DockStyle.Top;
         titulo.Height = 55;
 
-        TextBox detalle = new()
-        {
-            Name = "txtDetalleMision",
-            Multiline = true,
-            ReadOnly = true,
-            Dock = DockStyle.Fill,
-            BackColor = Panel,
-            ForeColor = Texto,
-            BorderStyle = BorderStyle.None,
-            Font = new Font("Segoe UI", 12),
-            ScrollBars = ScrollBars.Vertical
-        };
+        txtDetalleMision.Multiline = true;
+        txtDetalleMision.ReadOnly = true;
+        txtDetalleMision.Dock = DockStyle.Fill;
+        txtDetalleMision.BackColor = ColorPanel;
+        txtDetalleMision.ForeColor = Texto;
+        txtDetalleMision.BorderStyle = BorderStyle.None;
+        txtDetalleMision.Font = new Font("Segoe UI", 12);
+        txtDetalleMision.ScrollBars = ScrollBars.Vertical;
 
-        pagina.Controls.Add(detalle);
+        pagina.Controls.Add(txtDetalleMision);
         pagina.Controls.Add(titulo);
 
         return pagina;
@@ -339,7 +337,7 @@ public class FormularioPrincipal : Form
         contenido.Controls.Add(titulo, 0, 0);
 
         listaInventario.Dock = DockStyle.Fill;
-        listaInventario.BackColor = Panel;
+        listaInventario.BackColor = ColorPanel;
         listaInventario.ForeColor = Texto;
         listaInventario.Font = new Font("Segoe UI", 11);
         contenido.Controls.Add(listaInventario, 0, 1);
@@ -384,7 +382,7 @@ public class FormularioPrincipal : Form
             Text = texto,
             Width = ancho,
             Height = 38,
-            BackColor = Panel,
+            BackColor = ColorPanel,
             ForeColor = Texto,
             FlatStyle = FlatStyle.Flat,
             Cursor = Cursors.Hand,
@@ -596,7 +594,7 @@ public class FormularioPrincipal : Form
             }
             else
             {
-                botonesZonas[i].BackColor = Panel;
+                botonesZonas[i].BackColor = ColorPanel;
             }
         }
 
