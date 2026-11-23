@@ -198,7 +198,7 @@ public class FormularioPrincipal : Form
         txtNombre.SetBounds(28, 145, 330, 34);
         txtNombre.MaxLength = 35;
         txtNombre.Font = new Font("Segoe UI", 11);
-        txtNombre.BackColor = FondoPanelClaro;
+        txtNombre.BackColor = PanelClaro;
         txtNombre.ForeColor = Texto;
         txtNombre.BorderStyle = BorderStyle.FixedSingle;
 
@@ -208,7 +208,7 @@ public class FormularioPrincipal : Form
         cmbRealidad.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbRealidad.Items.AddRange(new object[] { "Alfa", "Beta" });
         cmbRealidad.SelectedIndex = 0;
-        cmbRealidad.BackColor = FondoPanelClaro;
+        cmbRealidad.BackColor = PanelClaro;
         cmbRealidad.ForeColor = Texto;
 
         Label lblSlot = CrearEtiqueta("Ranura de partida", 10);
@@ -217,7 +217,7 @@ public class FormularioPrincipal : Form
         cmbRanura.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbRanura.Items.AddRange(new object[] { "1", "2", "3" });
         cmbRanura.SelectedIndex = 0;
-        cmbRanura.BackColor = FondoPanelClaro;
+        cmbRanura.BackColor = PanelClaro;
         cmbRanura.ForeColor = Texto;
         cmbRanura.SelectedIndexChanged += (_, _) => CargarInformacionRanura();
 
