@@ -11,6 +11,25 @@ obj/
 [Bb]uild/
 [Dd]ebug/
 [Rr]elease/
+publish/
 
 # Archivos temporales
 *.tmp
+*.log
+
+# Configuraciones y secretos locales
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+secrets.json
+
+# Bases de datos locales y copias
+*.mdf
+*.ldf
+*.bak
+*.bacpac
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
