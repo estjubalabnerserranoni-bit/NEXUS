@@ -505,6 +505,7 @@ public class FormularioPrincipal : Form
         listaInventario.BackColor = FondoPanel;
         listaInventario.ForeColor = Texto;
         listaInventario.Font = new Font("Segoe UI", 11);
+        listaInventario.SelectedIndexChanged += (_, _) => ActualizarEstadoBotonInventario();
         layout.Controls.Add(listaInventario, 0, 1);
 
         FlowLayoutPanel fila = new()
@@ -513,7 +514,7 @@ public class FormularioPrincipal : Form
             FlowDirection = FlowDirection.LeftToRight,
             Padding = new Padding(2, 10, 2, 2)
         };
-        btnUsarCelda = CrearBoton("USAR CELDA DE ENERGÍA", UsarCelda, 220, 42, true);
+        btnUsarCelda = CrearBoton("USAR OBJETO SELECCIONADO", UsarCelda, 240, 42, true);
         fila.Controls.Add(btnUsarCelda);
 
         lblInventarioAyuda.Width = 500;
@@ -776,7 +777,25 @@ public class FormularioPrincipal : Form
 
     private void UsarCelda()
     {
-        EjecutarAccion(() => juego!.UsarCeldaEnergia());
+        if (listaInventario.SelectedItem is not ObjetoInventario objeto)
+        {
+            MostrarIris("Selecciona un objeto del inventario primero.");
+            return;
+        }
+
+        EjecutarAccion(() => juego!.UsarObjeto(objeto.Nombre));
+    }
+
+    private void ActualizarEstadoBotonInventario()
+    {
+        if (juego == null || btnUsarCelda == null)
+            return;
+
+        bool seleccionUsable = listaInventario.SelectedItem is ObjetoInventario objeto &&
+            objeto.Nombre == "Celda de energía" && objeto.Cantidad > 0 &&
+            juego.Cadete.Energia < 100;
+
+        btnUsarCelda.Enabled = seleccionUsable;
     }
 
     private void EjecutarAccion(Func<ResultadoAccion> accion)
@@ -916,12 +935,10 @@ public class FormularioPrincipal : Form
         foreach (ObjetoInventario objeto in cadete.Inventario.Where(item => item.Cantidad > 0))
             listaInventario.Items.Add(objeto);
 
-        bool tieneCelda = cadete.Inventario.Any(item =>
-            item.Nombre == "Celda de energía" && item.Cantidad > 0);
-        btnUsarCelda.Enabled = tieneCelda && cadete.Energia < 100;
+        ActualizarEstadoBotonInventario();
         lblInventarioAyuda.Text = listaInventario.Items.Count == 0
             ? "Todavía no encontraste objetos."
-            : "Una celda recupera 25 puntos de energía. Selecciona una para consultar su cantidad.";
+            : "Selecciona una celda de energía para recuperar 25 puntos. Las muestras son materiales de investigación.";
     }
 
     private void MostrarIris(string mensaje)
