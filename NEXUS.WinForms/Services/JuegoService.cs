@@ -236,10 +236,10 @@ public class JuegoService
         return new(true, $"Portal dimensional activado. Ahora estás en la realidad {destino}.");
     }
 
-    public ResultadoAccion UsarCeldaEnergia()
+    public ResultadoAccion UsarObjeto(string nombre)
     {
-        bool usada = Cadete.UsarCeldaEnergia(out string mensaje);
-        return new(usada, mensaje);
+        bool usado = Cadete.UsarObjeto(nombre, out string mensaje);
+        return new(usado, mensaje);
     }
 
     public ResultadoAccion AvanzarMision()
