@@ -45,7 +45,8 @@ internal static class Program
                 Energia = energia,
                 Estabilidad = 100
             },
-            Misiones = CampanaService.CrearCampana()
+            Misiones = CampanaService.CrearCampana(),
+            IndiceMisionActual = realidad == "Beta" ? 1 : 0
         };
 
         return new JuegoService(partida);
