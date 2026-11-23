@@ -15,6 +15,7 @@ internal static class Program
         Ejecutar("Completa MIS-001 con sus objetivos", ProbarMisionInicial);
         Ejecutar("El análisis crítico reduce estabilidad", ProbarAnalisisCritico);
         Ejecutar("La campaña tiene cinco misiones", ProbarCampana);
+        Ejecutar("No consume recursos antes de su misión", ProbarRecursoReservado);
         Ejecutar("Migra un guardado del prototipo anterior", ProbarMigracion);
 
         Console.WriteLine();
@@ -114,6 +115,32 @@ internal static class Program
         Verificar(juego.Partida.Misiones.Count == 5, "La campaña debe tener cinco misiones.");
         Verificar(juego.Partida.Misiones[0].Codigo == "MIS-001", "La primera misión debe ser MIS-001.");
         Verificar(juego.Partida.Misiones[4].Codigo == "MIS-005", "La última misión debe ser MIS-005.");
+    }
+
+    private static void ProbarRecursoReservado()
+    {
+        JuegoService juego = CrearJuego("Beta", 100);
+
+        Verificar(juego.Viajar(1).Exito, "No pudo salir de la base.");
+        Verificar(juego.Viajar(4).Exito, "No pudo llegar al sector intermedio.");
+        Verificar(juego.Viajar(5).Exito, "No pudo llegar al depósito.");
+
+        Verificar(!juego.Partida.ZonasExploradas[5],
+            "El depósito de MIS-003 no debe agotarse durante MIS-002.");
+        Verificar(!juego.Partida.MisionActual.TieneRecurso,
+            "MIS-002 no debe recibir un recurso que no forma parte de su objetivo.");
+
+        // Simula el inicio de MIS-003 para comprobar que el depósito sigue disponible.
+        juego.Partida.PosicionActual = 0;
+        juego.Partida.IndiceMisionActual = 2;
+        Verificar(juego.Viajar(1).Exito, "No pudo iniciar la ruta de MIS-003.");
+        Verificar(juego.Viajar(4).Exito, "No pudo cruzar el sector intermedio.");
+        Verificar(juego.Viajar(5).Exito, "No pudo recuperar el depósito reservado.");
+
+        Verificar(juego.Partida.MisionActual.TieneRecurso,
+            "MIS-003 debe poder recuperar el recurso reservado.");
+        Verificar(juego.Partida.ZonasExploradas[5],
+            "El depósito debe marcarse explorado después de la recolección correcta.");
     }
 
     private static void ProbarMigracion()
