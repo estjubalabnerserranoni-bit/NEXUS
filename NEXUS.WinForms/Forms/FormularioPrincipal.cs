@@ -26,11 +26,11 @@ public class FormularioPrincipal : Form
     private readonly TextBox txtDetalleMision = new();
 
     private readonly NumericUpDown numFrecuencia = new();
-    private readonly Button btnEscanear = new();
-    private readonly Button btnRecargar = new();
-    private readonly Button btnPurgar = new();
-    private readonly Button btnUsarCelda = new();
-    private readonly Button btnGuardar = new();
+    private Button btnEscanear = new();
+    private Button btnRecargar = new();
+    private Button btnPurgar = new();
+    private Button btnUsarCelda = new();
+    private Button btnGuardar = new();
     private readonly ListBox listaInventario = new();
 
     private readonly Button[] botonesZonas = new Button[9];
