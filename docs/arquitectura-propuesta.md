@@ -1,28 +1,51 @@
-# Arquitectura propuesta
+# Arquitectura de NEXUS
 
-La evolución se hará sin rehacer NEXUS desde cero. Se conservarán las reglas de `Explorador` y `Mision`, separándolas de la interfaz y del guardado de datos.
+NEXUS se organiza en capas para mantener separadas la interfaz, las reglas del juego y el almacenamiento.
 
-## 1. Partes del programa
+## 1. Interfaz — Windows Forms
 
-1. **Interfaz (Windows Forms):** mostrará el menú, exploración, misiones y datos del explorador. Una ventana principal puede cambiar entre paneles.
-2. **Lógica del juego:** contendrá las clases `Explorador` y `Mision` y las reglas de energía, exploración y estados. Los botones llamarán a esta lógica, sin decidir las reglas por su cuenta.
-3. **Acceso a datos:** tendrá clases sencillas para guardar y recuperar el progreso desde SQL Server. La interfaz no ejecutará consultas directamente.
+La carpeta `NEXUS.WinForms/Forms` contiene `FormularioPrincipal`, que construye el menú principal, la exploración, las misiones y el inventario. Los botones llaman a los servicios del juego y muestran sus resultados.
 
-## 2. Funcionamiento de la arquitectura
+## 2. Modelos
 
-El programa estará organizado en cuatro partes que trabajarán de manera conectada. Primero, el usuario interactuará con la interfaz de Windows Forms, donde podrá acceder al menú, mapa, misiones e inventario. Después, las acciones realizadas pasarán 
-a la lógica del juego, donde las clases `Explorador` y `Mision` se encargarán de aplicar las reglas correspondientes. A continuación, el acceso a datos gestionará la información que se desea guardar o recuperar. Finalmente, los datos se almacenarán en SQL Server para que el progreso pueda mantenerse.
+La carpeta `Models` contiene las clases que representan los datos:
 
-## 3. Cómo se relaciona con H3
+- `Explorador`: nombre, realidad, energía, estabilidad, nivel y objetos.
+- `Mision`: objetivo, requisitos, progreso, recompensa y estado.
+- `Partida`: ranura, campaña y progreso del cadete.
+- `ProgresoMapa`: posición, sectores visitados y explorados por realidad.
+- `ObjetoInventario`: nombre, descripción y cantidad.
 
-`Explorador` seguirá controlando nombre, energía, nivel de acceso y realidad actual. `Mision` seguirá controlando código, descripción y estado. `Program.Main`, que hoy coordina toda la demostración, se reducirá y la coordinación pasará a la ventana principal y a las clases de lógica.
+## 3. Lógica del juego
 
-Se agregarán formularios o paneles para mostrar los datos, y una capa de acceso a datos para guardar el progreso. Estas partes son nuevas y se implementarán después; no están presentes en la versión de consola revisada.
+La carpeta `Services` contiene las reglas:
 
-## 4. Orden recomendado
+- `JuegoService`: movimiento entre sectores, costos de energía, análisis, recarga, purga y cambio de realidad.
+- `CampanaService`: configuración de las cinco misiones iniciales.
 
-1. Crear el proyecto Windows Forms y mostrar una ventana principal.
-2. Reutilizar `Explorador` y `Mision` y probar las acciones desde botones.
-3. Agregar las pantallas de misión y exploración.
-4. Crear la base de datos y conectar el guardado/cargado.
-5. Probar que el progreso siga disponible después de cerrar y abrir el juego.
+Los formularios no deciden cuánto cuesta una acción ni cuándo se completa una misión. Solicitan la operación al servicio y muestran el resultado.
+
+## 4. Acceso a datos
+
+La carpeta `Data` separa dos formas de persistencia:
+
+- `GuardadoLocal`: guarda y recupera tres ranuras JSON en el equipo del usuario.
+- `SqlServerRepository`: guarda y recupera partidas en SQL Server, utiliza consultas parametrizadas y una transacción para mantener consistentes los datos relacionados.
+
+La cadena de conexión SQL se obtiene de la variable de entorno `NEXUS_SQLSERVER_CONNECTION`; no está escrita en el código público.
+
+## 5. Relación con el proyecto anterior
+
+El archivo `program-cs` conserva el prototipo de Windows Forms como referencia. Las clases se reorganizaron para que sea más sencillo mantener el juego. La documentación de H3 sigue describiendo la versión de consola original; esta solución representa la etapa gráfica posterior.
+
+## 6. Pruebas
+
+`tests/NEXUS.Tests` verifica reglas importantes sin necesitar abrir la interfaz. GitHub Actions ejecuta estas pruebas y compila la solución en Windows cuando hay cambios en `main` o pull requests.
+
+## 7. Orden de evolución
+
+1. Mantener la solución compilable y probar las reglas.
+2. Mejorar la presentación de pantallas y mapas.
+3. Ampliar misiones y objetos.
+4. Configurar y probar SQL Server en el equipo de desarrollo.
+5. Incorporar efectos visuales y de sonido sin cambiar las reglas ya probadas.
