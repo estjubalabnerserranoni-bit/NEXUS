@@ -609,21 +609,15 @@ public class FormularioPrincipal : Form
         btnRecargar.Enabled = juego.Partida.PosicionActual == 0;
         btnPurgar.Enabled = juego.Partida.PosicionActual == 0 && cadete.NucleoInestable;
 
-        TextBox? detalleMision = pestanas.TabPages["Misiones"]?
-            .Controls.Find("txtDetalleMision", true).FirstOrDefault() as TextBox;
-
-        if (detalleMision != null)
-        {
-            detalleMision.Text =
-                $"{mision.Codigo} - {mision.Nombre}\r\n\r\n" +
-                $"{mision.Descripcion}\r\n\r\n" +
-                $"1. Recuperar una celda de energía: {(mision.TieneRecurso ? "COMPLETADO" : "PENDIENTE")}\r\n" +
-                $"2. Analizar una anomalía: {(mision.TieneAnalisis ? "COMPLETADO" : "PENDIENTE")}\r\n" +
-                "3. Regresar a la base central: " +
-                $"{(mision.Completada ? "COMPLETADO" : "PENDIENTE")}\r\n\r\n" +
-                $"Estado: {mision.Estado}\r\n" +
-                $"Nivel de acceso actual: {cadete.NivelAcceso}";
-        }
+        txtDetalleMision.Text =
+            $"{mision.Codigo} - {mision.Nombre}\r\n\r\n" +
+            $"{mision.Descripcion}\r\n\r\n" +
+            $"1. Recuperar una celda de energía: {(mision.TieneRecurso ? "COMPLETADO" : "PENDIENTE")}\r\n" +
+            $"2. Analizar una anomalía: {(mision.TieneAnalisis ? "COMPLETADO" : "PENDIENTE")}\r\n" +
+            "3. Regresar a la base central: " +
+            $"{(mision.Completada ? "COMPLETADO" : "PENDIENTE")}\r\n\r\n" +
+            $"Estado: {mision.Estado}\r\n" +
+            $"Nivel de acceso actual: {cadete.NivelAcceso}";
 
         listaInventario.Items.Clear();
 
