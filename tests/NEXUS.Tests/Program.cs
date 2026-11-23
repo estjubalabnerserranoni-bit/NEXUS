@@ -16,6 +16,7 @@ internal static class Program
         Ejecutar("El análisis crítico reduce estabilidad", ProbarAnalisisCritico);
         Ejecutar("La campaña tiene cinco misiones", ProbarCampana);
         Ejecutar("No consume recursos antes de su misión", ProbarRecursoReservado);
+        Ejecutar("La purga completa la misión de ruptura", ProbarPurgaMision);
         Ejecutar("Migra un guardado del prototipo anterior", ProbarMigracion);
 
         Console.WriteLine();
@@ -141,6 +142,25 @@ internal static class Program
             "MIS-003 debe poder recuperar el recurso reservado.");
         Verificar(juego.Partida.ZonasExploradas[5],
             "El depósito debe marcarse explorado después de la recolección correcta.");
+    }
+
+    private static void ProbarPurgaMision()
+    {
+        JuegoService juego = CrearJuego("Beta", 100);
+        juego.Partida.IndiceMisionActual = 3;
+        Mision mision = juego.Partida.MisionActual;
+        mision.AnalisisCompletados = 2;
+        mision.AnalisisCriticosCompletados = 1;
+        mision.SectoresAnalizados.Add(6);
+        mision.SectoresAnalizados.Add(8);
+        juego.Cadete.NucleoInestable = true;
+
+        ResultadoAccion resultado = juego.PurgarNucleo();
+
+        Verificar(resultado.Exito, "La purga debe realizarse en la base.");
+        Verificar(mision.PurgaRealizada, "La misión debe registrar la purga.");
+        Verificar(mision.Completada, "La misión debe completarse al cumplir los demás objetivos y purgar.");
+        Verificar(juego.Cadete.NivelAcceso == 2, "La recompensa debe aumentar el nivel de acceso.");
     }
 
     private static void ProbarMigracion()
