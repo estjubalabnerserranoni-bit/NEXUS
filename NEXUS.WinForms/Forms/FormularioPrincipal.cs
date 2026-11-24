@@ -20,6 +20,7 @@ public class FormularioPrincipal : Form
 
     private readonly Panel panelMenu = new();
     private readonly Panel panelJuego = new();
+    private FondoMenuControl? fondoMenu;
     private readonly Label lblIris = new();
 
     private readonly TextBox txtNombre = new();
@@ -115,18 +116,19 @@ public class FormularioPrincipal : Form
     {
         panelMenu.Controls.Clear();
 
-        FondoMenuControl fondo = new()
+        fondoMenu = new FondoMenuControl
         {
             Dock = DockStyle.Fill,
             TabStop = false
         };
-        panelMenu.Controls.Add(fondo);
+        panelMenu.BackColor = Color.FromArgb(3, 12, 25);
+        panelMenu.Controls.Add(fondoMenu);
 
         Label lblCadete = CrearEtiqueta("IDENTIFICACIÓN DEL CADETE", 9);
         lblCadete.ForeColor = Color.FromArgb(173, 243, 250);
         lblCadete.BackColor = Color.Transparent;
         lblCadete.AutoSize = true;
-        panelMenu.Controls.Add(lblCadete);
+        fondoMenu.Controls.Add(lblCadete);
 
         txtNombre.MaxLength = 35;
         txtNombre.Font = new Font("Segoe UI", 11, FontStyle.Bold);
@@ -134,12 +136,12 @@ public class FormularioPrincipal : Form
         txtNombre.ForeColor = Texto;
         txtNombre.BorderStyle = BorderStyle.FixedSingle;
         txtNombre.Text = "";
-        panelMenu.Controls.Add(txtNombre);
+        fondoMenu.Controls.Add(txtNombre);
 
         Label lblRealidad = CrearEtiqueta("REALIDAD", 9);
         lblRealidad.ForeColor = Color.FromArgb(173, 243, 250);
         lblRealidad.BackColor = Color.Transparent;
-        panelMenu.Controls.Add(lblRealidad);
+        fondoMenu.Controls.Add(lblRealidad);
 
         cmbRealidad.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbRealidad.Items.Clear();
@@ -147,12 +149,12 @@ public class FormularioPrincipal : Form
         cmbRealidad.SelectedIndex = 0;
         cmbRealidad.BackColor = Color.FromArgb(5, 29, 48);
         cmbRealidad.ForeColor = Texto;
-        panelMenu.Controls.Add(cmbRealidad);
+        fondoMenu.Controls.Add(cmbRealidad);
 
         Label lblRanura = CrearEtiqueta("RANURA", 9);
         lblRanura.ForeColor = Color.FromArgb(173, 243, 250);
         lblRanura.BackColor = Color.Transparent;
-        panelMenu.Controls.Add(lblRanura);
+        fondoMenu.Controls.Add(lblRanura);
 
         cmbRanura.DropDownStyle = ComboBoxStyle.DropDownList;
         cmbRanura.Items.Clear();
@@ -161,12 +163,12 @@ public class FormularioPrincipal : Form
         cmbRanura.BackColor = Color.FromArgb(5, 29, 48);
         cmbRanura.ForeColor = Texto;
         cmbRanura.SelectedIndexChanged += (_, _) => CargarInformacionRanura();
-        panelMenu.Controls.Add(cmbRanura);
+        fondoMenu.Controls.Add(cmbRanura);
 
         lblInfoRanura.ForeColor = Color.FromArgb(168, 219, 232);
         lblInfoRanura.BackColor = Color.Transparent;
         lblInfoRanura.Font = new Font("Segoe UI", 8.5f);
-        panelMenu.Controls.Add(lblInfoRanura);
+        fondoMenu.Controls.Add(lblInfoRanura);
 
         btnMenuIniciar = CrearBotonMenu("INICIAR PARTIDA", NuevaPartida, true);
         btnMenuContinuar = CrearBotonMenu("CONTINUAR PARTIDA");
@@ -180,7 +182,7 @@ public class FormularioPrincipal : Form
         btnMenuSalir = CrearBotonMenu("SALIR DEL JUEGO");
         btnMenuSalir.Click += (_, _) => Salir();
 
-        panelMenu.Controls.AddRange(new Control[]
+        fondoMenu.Controls.AddRange(new Control[]
         {
             btnMenuIniciar, btnMenuContinuar, btnMenuRealidad,
             btnMenuAjustes, btnMenuAcerca, btnMenuSalir
@@ -211,11 +213,11 @@ public class FormularioPrincipal : Form
 
     private void AjustarMenuPrincipal()
     {
-        if (panelMenu.Controls.Count == 0)
+        if (fondoMenu == null || fondoMenu.Controls.Count == 0)
             return;
 
-        int w = panelMenu.ClientSize.Width;
-        int h = panelMenu.ClientSize.Height;
+        int w = fondoMenu.ClientSize.Width;
+        int h = fondoMenu.ClientSize.Height;
         if (w < 200 || h < 200)
             return;
 
@@ -227,11 +229,11 @@ public class FormularioPrincipal : Form
         int altoBoton = Math.Clamp((int)(h * .068f), 45, 58);
         int espacio = Math.Max(9, (int)(h * .019f));
 
-        Control? nombreLabel = panelMenu.Controls.Cast<Control>()
+        Control? nombreLabel = fondoMenu.Controls.Cast<Control>()
             .FirstOrDefault(x => x is Label l && l.Text == "IDENTIFICACIÓN DEL CADETE");
-        Control? realidadLabel = panelMenu.Controls.Cast<Control>()
+        Control? realidadLabel = fondoMenu.Controls.Cast<Control>()
             .FirstOrDefault(x => x is Label l && l.Text == "REALIDAD");
-        Control? ranuraLabel = panelMenu.Controls.Cast<Control>()
+        Control? ranuraLabel = fondoMenu.Controls.Cast<Control>()
             .FirstOrDefault(x => x is Label l && l.Text == "RANURA");
 
         nombreLabel?.SetBounds(izquierda, yEntrada - 27, anchoEntrada, 22);
