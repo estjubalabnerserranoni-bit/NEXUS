@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using NexusJuegoForms.Controls;
 using NexusJuegoForms.Data;
 using NexusJuegoForms.Models;
 using NexusJuegoForms.Services;
@@ -33,18 +34,24 @@ public class FormularioPrincipal : Form
     private readonly Label lblEstadoExplorador = new();
     private readonly Label lblResumenMision = new();
     private readonly Label lblInventarioAyuda = new();
+    private readonly MapaExploracionControl mapaExploracion = new();
 
     private readonly TextBox txtDetalleMision = new();
     private readonly NumericUpDown numFrecuencia = new();
     private readonly ListBox listaInventario = new();
 
-    private readonly Button[] botonesZonas = new Button[9];
     private Button btnEscanear = new();
     private Button btnRecargar = new();
     private Button btnPurgar = new();
     private Button btnCambiarRealidad = new();
     private Button btnSiguienteMision = new();
     private Button btnUsarCelda = new();
+    private BotonNeon btnMenuIniciar = new();
+    private BotonNeon btnMenuContinuar = new();
+    private BotonNeon btnMenuRealidad = new();
+    private BotonNeon btnMenuAjustes = new();
+    private BotonNeon btnMenuAcerca = new();
+    private BotonNeon btnMenuSalir = new();
 
     private JuegoService? juego;
     private int zonaSeleccionada = 1;
@@ -66,6 +73,10 @@ public class FormularioPrincipal : Form
         CrearEstructuraPrincipal();
         CrearMenuPrincipal();
         CrearInterfazJuego();
+
+        mapaExploracion.SectorSeleccionado += SeleccionarZona;
+        mapaExploracion.MovimientoSolicitado += ViajarA;
+        panelMenu.SizeChanged += (_, _) => AjustarMenuPrincipal();
 
         panelJuego.Visible = false;
         panelMenu.Visible = true;
@@ -102,151 +113,162 @@ public class FormularioPrincipal : Form
 
     private void CrearMenuPrincipal()
     {
-        TableLayoutPanel layout = new()
+        panelMenu.Controls.Clear();
+
+        FondoMenuControl fondo = new()
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 2,
-            RowCount = 1,
-            Padding = new Padding(36),
-            BackColor = Fondo
+            TabStop = false
         };
+        panelMenu.Controls.Add(fondo);
 
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 57));
-        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 43));
+        Label lblCadete = CrearEtiqueta("IDENTIFICACIÓN DEL CADETE", 9);
+        lblCadete.ForeColor = Color.FromArgb(173, 243, 250);
+        lblCadete.BackColor = Color.Transparent;
+        lblCadete.AutoSize = true;
+        panelMenu.Controls.Add(lblCadete);
 
-        Panel presentacion = new()
-        {
-            Dock = DockStyle.Fill,
-            BackColor = Fondo,
-            Padding = new Padding(12, 25, 30, 20)
-        };
-
-        Label marca = new()
-        {
-            Text = "NEXUS",
-            Font = new Font("Segoe UI", 42, FontStyle.Bold),
-            ForeColor = Cian,
-            AutoSize = true,
-            Location = new Point(15, 35)
-        };
-
-        Label subtitulo = new()
-        {
-            Text = "EXPLORATION  /  REALITY SYSTEM",
-            Font = new Font("Segoe UI", 12, FontStyle.Bold),
-            ForeColor = Texto,
-            AutoSize = true,
-            Location = new Point(20, 105)
-        };
-
-        Label linea = new()
-        {
-            Text = "AÑO 2297     •     PROTOCOLO DE EXPLORACIÓN DIMENSIONAL",
-            Font = new Font("Segoe UI", 9),
-            ForeColor = TextoSuave,
-            AutoSize = true,
-            Location = new Point(20, 145)
-        };
-
-        Label historia = new()
-        {
-            Text = "Las realidades están cambiando.\nLas señales no identificadas aumentan.\nTu misión es investigar las anomalías,\nproteger la estabilidad y descubrir\nel origen del sistema NEXUS.",
-            Font = new Font("Segoe UI", 15),
-            ForeColor = Texto,
-            AutoSize = true,
-            Location = new Point(20, 225)
-        };
-
-        Label estadoSistema = new()
-        {
-            Text = "● IRIS EN LÍNEA     ● SISTEMA DE NAVEGACIÓN DISPONIBLE",
-            Font = new Font("Segoe UI", 9, FontStyle.Bold),
-            ForeColor = Verde,
-            AutoSize = true,
-            Location = new Point(20, 420)
-        };
-
-        presentacion.Controls.AddRange(new Control[] { marca, subtitulo, linea, historia, estadoSistema });
-
-        Panel tarjeta = new()
-        {
-            Dock = DockStyle.Fill,
-            BackColor = FondoPanel,
-            Padding = new Padding(26)
-        };
-
-        Label acceso = new()
-        {
-            Text = "CENTRO DE ACCESO",
-            Font = new Font("Segoe UI", 17, FontStyle.Bold),
-            ForeColor = Texto,
-            AutoSize = true,
-            Location = new Point(26, 25)
-        };
-
-        Label ayuda = new()
-        {
-            Text = "Identifica al cadete para iniciar la exploración.",
-            Font = new Font("Segoe UI", 9),
-            ForeColor = TextoSuave,
-            AutoSize = true,
-            Location = new Point(28, 65)
-        };
-
-        Label lblNombre = CrearEtiqueta("Nombre del cadete", 10);
-        lblNombre.Location = new Point(28, 115);
-        txtNombre.SetBounds(28, 145, 330, 34);
         txtNombre.MaxLength = 35;
-        txtNombre.Font = new Font("Segoe UI", 11);
-        txtNombre.BackColor = PanelClaro;
+        txtNombre.Font = new Font("Segoe UI", 11, FontStyle.Bold);
+        txtNombre.BackColor = Color.FromArgb(5, 29, 48);
         txtNombre.ForeColor = Texto;
         txtNombre.BorderStyle = BorderStyle.FixedSingle;
+        txtNombre.Text = "";
+        panelMenu.Controls.Add(txtNombre);
 
-        Label lblRealidad = CrearEtiqueta("Realidad inicial", 10);
-        lblRealidad.Location = new Point(28, 195);
-        cmbRealidad.SetBounds(28, 225, 155, 34);
+        Label lblRealidad = CrearEtiqueta("REALIDAD", 9);
+        lblRealidad.ForeColor = Color.FromArgb(173, 243, 250);
+        lblRealidad.BackColor = Color.Transparent;
+        panelMenu.Controls.Add(lblRealidad);
+
         cmbRealidad.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbRealidad.Items.Clear();
         cmbRealidad.Items.AddRange(new object[] { "Alfa", "Beta" });
         cmbRealidad.SelectedIndex = 0;
-        cmbRealidad.BackColor = PanelClaro;
+        cmbRealidad.BackColor = Color.FromArgb(5, 29, 48);
         cmbRealidad.ForeColor = Texto;
+        panelMenu.Controls.Add(cmbRealidad);
 
-        Label lblSlot = CrearEtiqueta("Ranura de partida", 10);
-        lblSlot.Location = new Point(205, 195);
-        cmbRanura.SetBounds(205, 225, 153, 34);
+        Label lblRanura = CrearEtiqueta("RANURA", 9);
+        lblRanura.ForeColor = Color.FromArgb(173, 243, 250);
+        lblRanura.BackColor = Color.Transparent;
+        panelMenu.Controls.Add(lblRanura);
+
         cmbRanura.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbRanura.Items.Clear();
         cmbRanura.Items.AddRange(new object[] { "1", "2", "3" });
         cmbRanura.SelectedIndex = 0;
-        cmbRanura.BackColor = PanelClaro;
+        cmbRanura.BackColor = Color.FromArgb(5, 29, 48);
         cmbRanura.ForeColor = Texto;
         cmbRanura.SelectedIndexChanged += (_, _) => CargarInformacionRanura();
+        panelMenu.Controls.Add(cmbRanura);
 
-        lblInfoRanura.SetBounds(28, 268, 330, 42);
-        lblInfoRanura.ForeColor = TextoSuave;
-        lblInfoRanura.Font = new Font("Segoe UI", 9);
+        lblInfoRanura.ForeColor = Color.FromArgb(168, 219, 232);
+        lblInfoRanura.BackColor = Color.Transparent;
+        lblInfoRanura.Font = new Font("Segoe UI", 8.5f);
+        panelMenu.Controls.Add(lblInfoRanura);
 
-        Button btnNueva = CrearBoton("NUEVA PARTIDA", NuevaPartida, 330, 45, destacado: true);
-        btnNueva.SetBounds(28, 330, 330, 45);
+        btnMenuIniciar = CrearBotonMenu("INICIAR PARTIDA", NuevaPartida, true);
+        btnMenuContinuar = CrearBotonMenu("CONTINUAR PARTIDA");
+        btnMenuContinuar.Click += (_, _) => ContinuarPartida();
+        btnMenuRealidad = CrearBotonMenu("SELECCIONAR REALIDAD");
+        btnMenuRealidad.Click += (_, _) => cmbRealidad.DroppedDown = true;
+        btnMenuAjustes = CrearBotonMenu("AJUSTES / SQL SERVER");
+        btnMenuAjustes.Click += (_, _) => ConfigurarSqlServer();
+        btnMenuAcerca = CrearBotonMenu("ACERCA DE NEXUS");
+        btnMenuAcerca.Click += (_, _) => MostrarAcercaDe();
+        btnMenuSalir = CrearBotonMenu("SALIR DEL JUEGO");
+        btnMenuSalir.Click += (_, _) => Salir();
 
-        Button btnContinuar = CrearBoton("CONTINUAR PARTIDA", ContinuarPartida, 330, 42);
-        btnContinuar.SetBounds(28, 387, 330, 42);
-
-        Button btnAjustes = CrearBoton("CONFIGURACIÓN SQL", ConfigurarSqlServer, 158, 38);
-        btnAjustes.SetBounds(28, 445, 158, 38);
-
-        Button btnSalir = CrearBoton("SALIR", Salir, 158, 38);
-        btnSalir.SetBounds(200, 445, 158, 38);
-
-        tarjeta.Controls.AddRange(new Control[]
+        panelMenu.Controls.AddRange(new Control[]
         {
-            acceso, ayuda, lblNombre, txtNombre, lblRealidad, cmbRealidad,
-            lblSlot, cmbRanura, lblInfoRanura, btnNueva, btnContinuar,
-            btnAjustes, btnSalir
+            btnMenuIniciar, btnMenuContinuar, btnMenuRealidad,
+            btnMenuAjustes, btnMenuAcerca, btnMenuSalir
         });
 
-        layout.Controls.Add(presentacion, 0, 0);
-        layout.Controls.Add(tarjeta, 1, 0);
-        panelMenu.Controls.Add(layout);
+        AjustarMenuPrincipal();
+        CargarInformacionRanura();
+    }
+
+    private BotonNeon CrearBotonMenu(string texto, Action? accion = null, bool destacado = false)
+    {
+        BotonNeon boton = new()
+        {
+            Text = texto,
+            ColorNeon = destacado ? Color.FromArgb(255, 213, 42) : Cian,
+            Destacado = destacado,
+            Height = 54,
+            Width = 330,
+            Font = new Font("Segoe UI", 10.5f, FontStyle.Bold),
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+
+        if (accion != null)
+            boton.Click += (_, _) => accion();
+
+        return boton;
+    }
+
+    private void AjustarMenuPrincipal()
+    {
+        if (panelMenu.Controls.Count == 0)
+            return;
+
+        int w = panelMenu.ClientSize.Width;
+        int h = panelMenu.ClientSize.Height;
+        if (w < 200 || h < 200)
+            return;
+
+        int izquierda = (int)(w * .065f);
+        int anchoEntrada = Math.Clamp((int)(w * .30f), 270, 430);
+        int yEntrada = (int)(h * .665f);
+        int xMenu = (int)(w * .70f);
+        int anchoMenu = Math.Clamp((int)(w * .265f), 250, 390);
+        int altoBoton = Math.Clamp((int)(h * .068f), 45, 58);
+        int espacio = Math.Max(9, (int)(h * .019f));
+
+        Control? nombreLabel = panelMenu.Controls.Cast<Control>()
+            .FirstOrDefault(x => x is Label l && l.Text == "IDENTIFICACIÓN DEL CADETE");
+        Control? realidadLabel = panelMenu.Controls.Cast<Control>()
+            .FirstOrDefault(x => x is Label l && l.Text == "REALIDAD");
+        Control? ranuraLabel = panelMenu.Controls.Cast<Control>()
+            .FirstOrDefault(x => x is Label l && l.Text == "RANURA");
+
+        nombreLabel?.SetBounds(izquierda, yEntrada - 27, anchoEntrada, 22);
+        txtNombre.SetBounds(izquierda, yEntrada, anchoEntrada, 35);
+
+        int selectorY = yEntrada + 52;
+        realidadLabel?.SetBounds(izquierda, selectorY, anchoEntrada / 2 - 8, 18);
+        ranuraLabel?.SetBounds(izquierda + anchoEntrada / 2 + 6, selectorY, anchoEntrada / 2 - 6, 18);
+        cmbRealidad.SetBounds(izquierda, selectorY + 21, anchoEntrada / 2 - 12, 34);
+        cmbRanura.SetBounds(izquierda + anchoEntrada / 2 + 4, selectorY + 21, anchoEntrada / 2 - 4, 34);
+        lblInfoRanura.SetBounds(izquierda, selectorY + 63, anchoEntrada, 34);
+
+        BotonNeon[] botones =
+        {
+            btnMenuIniciar, btnMenuContinuar, btnMenuRealidad,
+            btnMenuAjustes, btnMenuAcerca, btnMenuSalir
+        };
+
+        int inicioY = Math.Max(72, (int)(h * .19f));
+        for (int i = 0; i < botones.Length; i++)
+        {
+            botones[i].SetBounds(xMenu, inicioY + i * (altoBoton + espacio), anchoMenu, altoBoton);
+        }
+    }
+
+    private void MostrarAcercaDe()
+    {
+        MessageBox.Show(
+            "NEXUS — Exploration / Reality System\n\n" +
+            "Año 2297. Un cadete explora realidades alternativas, investiga anomalías y protege la estabilidad dimensional con la ayuda de IRIS.\n\n" +
+            "Controles de exploración:\n" +
+            "• Flechas o W A S D para caminar a un sector vecino.\n" +
+            "• Clic en un sector conectado para desplazarte.\n" +
+            "• Usa el panel de misión para analizar, recuperar recursos y volver a la base.",
+            "Acerca de NEXUS",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     private void CrearInterfazJuego()
@@ -329,31 +351,10 @@ public class FormularioPrincipal : Form
         tituloMapa.Font = new Font("Segoe UI", 15, FontStyle.Bold);
         panelMapa.Controls.Add(tituloMapa, 0, 0);
 
-        TableLayoutPanel grid = new()
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 3,
-            RowCount = 3,
-            BackColor = Fondo
-        };
-
-        for (int i = 0; i < 3; i++)
-        {
-            grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-            grid.RowStyles.Add(new RowStyle(SizeType.Percent, 33.33F));
-        }
-
-        for (int i = 0; i < 9; i++)
-        {
-            int indice = i;
-            Button boton = CrearBoton("", () => SeleccionarZona(indice), 120, 70);
-            boton.Dock = DockStyle.Fill;
-            boton.Margin = new Padding(5);
-            botonesZonas[i] = boton;
-            grid.Controls.Add(boton, i % 3, i / 3);
-        }
-
-        panelMapa.Controls.Add(grid, 0, 1);
+        mapaExploracion.Dock = DockStyle.Fill;
+        mapaExploracion.Margin = new Padding(2);
+        mapaExploracion.MinimumSize = new Size(300, 250);
+        panelMapa.Controls.Add(mapaExploracion, 0, 1);
 
         FlowLayoutPanel filaSeleccion = new()
         {
@@ -642,6 +643,7 @@ public class FormularioPrincipal : Form
         panelJuego.BringToFront();
         pestanas.SelectedIndex = 0;
         ActualizarInterfaz();
+        mapaExploracion.Focus();
     }
 
     private void VolverAlMenu()
@@ -739,7 +741,31 @@ public class FormularioPrincipal : Form
 
     private void ViajarSeleccionado()
     {
-        EjecutarAccion(() => juego!.Viajar(zonaSeleccionada));
+        ViajarA(zonaSeleccionada);
+    }
+
+    private void ViajarA(int destino)
+    {
+        if (juego == null)
+            return;
+
+        int origen = juego.Partida.PosicionActual;
+        ResultadoAccion resultado = juego.Viajar(destino);
+
+        if (resultado.Exito && destino != origen)
+        {
+            zonaSeleccionada = destino;
+            ActualizarInterfaz();
+            mapaExploracion.AnimarMovimiento(origen, destino);
+        }
+        else
+        {
+            MostrarIris(resultado.Mensaje);
+            ActualizarInterfaz();
+        }
+
+        if (resultado.Exito)
+            GuardarAutomaticamente();
     }
 
     private void Escanear()
@@ -916,17 +942,7 @@ public class FormularioPrincipal : Form
                 JuegoService.ResumenObjetivos(mision);
         }
 
-        for (int i = 0; i < botonesZonas.Length; i++)
-        {
-            ZonaInfo zona = juego.MapaActual[i];
-            string estado = juego.ObtenerEstadoZona(i);
-
-            botonesZonas[i].Text = $"{zona.Nombre}\n{estado}";
-            botonesZonas[i].BackColor =
-                i == juego.Partida.PosicionActual ? Color.FromArgb(27, 106, 119) :
-                i == zonaSeleccionada ? Color.FromArgb(65, 85, 115) : PanelClaro;
-        }
-
+        mapaExploracion.Actualizar(juego, zonaSeleccionada);
         ZonaInfo seleccion = juego.MapaActual[zonaSeleccionada];
         lblZonaSeleccionada.Text =
             $"Seleccionada: {seleccion.Nombre}\nEstado: {juego.ObtenerEstadoZona(zonaSeleccionada)}";
