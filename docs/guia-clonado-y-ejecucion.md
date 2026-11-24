@@ -53,7 +53,17 @@ Pulsa F5 o el botón **Iniciar**. En el menú de NEXUS:
 
 El juego funciona con guardado local y no necesita SQL Server para iniciar.
 
-## 5. Probar las reglas
+## 5. Controles para jugar
+
+En la pantalla de exploración puedes mover al cadete de tres maneras:
+
+- Flechas del teclado para caminar arriba, abajo, izquierda y derecha.
+- Teclas `W`, `A`, `S`, `D`.
+- Clic sobre un sector conectado directamente al sector actual.
+
+El cadete solo camina a sectores vecinos. Cada desplazamiento cuesta 10 puntos de energía. Para recuperar energía debes usar una celda del inventario o regresar a la base. En las pestañas **Misiones** e **Inventario** puedes consultar los objetivos y objetos.
+
+## 6. Probar las reglas
 
 Desde la carpeta raíz abre PowerShell y ejecuta:
 
@@ -65,7 +75,7 @@ dotnet run --project tests/NEXUS.Tests/NEXUS.Tests.csproj --configuration Releas
 
 Si las pruebas finalizan, verás mensajes `[OK]` y un resumen de las pruebas correctas.
 
-## 6. Configurar SQL Server (opcional)
+## 7. Configurar SQL Server (opcional)
 
 1. Instala SQL Server y SQL Server Management Studio.
 2. Abre SSMS y conéctate a la instancia local.
@@ -76,7 +86,7 @@ Si las pruebas finalizan, verás mensajes `[OK]` y un resumen de las pruebas cor
 
 El guardado automático local sigue activo. El botón Guardar partida conserva el progreso local y también lo envía a SQL Server cuando la conexión está configurada.
 
-## 7. Revisar GitHub Actions
+## 8. Revisar GitHub Actions
 
 1. Abre el repositorio en GitHub.
 2. Entra a la pestaña **Actions**.
