@@ -1,6 +1,6 @@
-# NEXUS — Windows Forms
+# NEXUS — videojuego Windows Forms
 
-Este proyecto es la aplicación gráfica del videojuego NEXUS.
+Aplicación gráfica de exploración dimensional en C# para Windows.
 
 ## Requisitos
 
@@ -11,26 +11,31 @@ Este proyecto es la aplicación gráfica del videojuego NEXUS.
 
 ## Ejecutar
 
-Se recomienda abrir `NEXUS.sln` desde la raíz del repositorio. En Visual Studio, establece `NEXUS.WinForms` como proyecto de inicio y pulsa F5.
+Abre `NEXUS.sln` desde la raíz del repositorio. Establece `NEXUS.WinForms` como proyecto de inicio y pulsa F5.
 
-## Funciones
+## Funciones actuales
 
-- Menú principal con tres ranuras de partida.
-- Realidades Alfa y Beta.
-- Mapa de nueve sectores y viajes entre sectores vecinos.
-- Energía, estabilidad y núcleo.
-- Escaneo de anomalías normal y crítico.
-- Inventario con objetos consumibles y materiales.
-- Campaña de cinco misiones.
-- Alertas de IRIS.
-- Guardado local automático en JSON.
-- Repositorio opcional de SQL Server.
+- Menú con portal dimensional y botones futuristas.
+- Registro del cadete, selección de realidad y tres ranuras.
+- Escena 2D alienígena dibujada en C#.
+- Personaje visible con animación de caminata.
+- Movimiento con flechas, W, A, S, D y clic en sectores vecinos.
+- Realidades Alfa y Beta, mapa de nueve sectores y rutas.
+- Energía, estabilidad, anomalías, recursos y núcleo.
+- Campaña inicial de cinco misiones.
+- Inventario, mensajes IRIS y guardado local.
+- Conexión opcional preparada para SQL Server.
 
-## Estructura
+## Carpetas
 
-- `Models`: explorador, partida, mapas, misiones e inventario.
+- `Controls`: escena 2D, menú, botones y dibujo.
+- `Models`: cadete, partida, mapa, misión e inventario.
 - `Services`: reglas del juego y campaña.
-- `Forms`: menú y pantallas Windows Forms.
+- `Forms`: menú y pantallas.
 - `Data`: guardado JSON y SQL Server.
 
-SQL Server no es necesario para iniciar el juego. Para activarlo, ejecuta `database/01-esquema.sql` y configura `NEXUS_SQLSERVER_CONNECTION` como explica `database/README.md`.
+## Mejoras futuras
+
+Se proponen ilustraciones originales detalladas por sector, banda sonora y efectos de sonido, animaciones avanzadas y nuevas campañas. La escena ya tiene arte vectorial y el cadete tiene animación básica de caminata; los efectos y campañas ampliadas quedan para posteriores versiones.
+
+SQL Server no es obligatorio para jugar localmente. Para configurarlo, sigue `database/README.md`.
