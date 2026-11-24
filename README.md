@@ -1,23 +1,22 @@
 # NEXUS — Exploration / Reality System
 
-Videojuego de exploración dimensional desarrollado en C# con Windows Forms. El jugador controla a un cadete que investiga anomalías, recupera recursos, administra energía y estabilidad y cumple una campaña inicial de cinco misiones con ayuda de IRIS.
+Videojuego 2D de exploración dimensional desarrollado en C# con Windows Forms. El jugador controla a un cadete que recorre realidades alternativas, investiga anomalías, recupera recursos y completa misiones con ayuda de IRIS.
 
-## Abrir y ejecutar desde GitHub
+## Abrir desde GitHub
 
-**Requisito:** Windows, Visual Studio 2022 versión 17.8 o posterior, carga de trabajo **Desarrollo de escritorio de .NET** y SDK de .NET 8.
+**Requisitos:** Windows, Visual Studio 2022 versión 17.8 o posterior, carga de trabajo **Desarrollo de escritorio de .NET** y SDK de .NET 8.
 
-1. Abre este repositorio en GitHub.
-2. Pulsa **Code → Clone** y copia la dirección HTTPS, o usa:
+1. Clona este repositorio desde GitHub con **Code → Clone**, o ejecuta:
    ```powershell
    git clone https://github.com/estjubalabnerserranoni-bit/NEXUS.git
    cd NEXUS
    ```
-3. Abre el archivo `NEXUS.sln` que está en la raíz del repositorio.
-4. Espera a que Visual Studio restaure los paquetes NuGet.
-5. En el selector de inicio, elige `NEXUS.WinForms`.
-6. Pulsa **F5** o el botón **Iniciar**.
+2. Abre `NEXUS.sln` desde la raíz del repositorio.
+3. Espera la restauración de paquetes NuGet.
+4. Establece `NEXUS.WinForms` como proyecto de inicio.
+5. Pulsa F5 para abrir el menú principal.
 
-También se puede compilar desde una terminal con .NET 8:
+También puedes compilar y probar desde PowerShell:
 
 ```powershell
 dotnet restore NEXUS.sln
@@ -25,65 +24,63 @@ dotnet build NEXUS.sln --configuration Release
 dotnet run --project tests/NEXUS.Tests/NEXUS.Tests.csproj --configuration Release
 ```
 
-NEXUS utiliza Windows Forms, por lo que la aplicación gráfica se ejecuta en Windows. No requiere SQL Server para iniciar una partida local.
+NEXUS usa Windows Forms y se ejecuta en Windows. SQL Server no es obligatorio para iniciar una partida local.
 
-## Funciones incluidas
+## Experiencia de juego implementada
 
-- Menú principal con identificación del cadete, selección de realidad y tres ranuras de partida.
-- Nueva partida, continuación y confirmación antes de reemplazar un guardado.
-- Realidades Alfa y Beta con progreso independiente.
-- Mapa de nueve sectores y desplazamiento entre sectores vecinos.
-- Energía, estabilidad y núcleo dimensional.
-- Escáner de anomalías con lecturas normales y críticas.
-- Inventario con celdas de energía y muestras de anomalía.
-- Cinco misiones con objetivos, requisitos y recompensas de progresión.
-- Cambio de realidad desde la base central.
-- Alertas y mensajes de IRIS.
-- Guardado local automático en JSON.
-- Persistencia opcional en SQL Server.
+- Menú principal con portal dimensional, estética azul/cian y botones luminosos.
+- Registro del cadete, selección de realidad Alfa/Beta y tres ranuras.
+- Escena 2D alienígena dibujada por código, con planeta, torres, agua, plataformas y rutas holográficas.
+- Cadete visible con animación básica de caminata entre sectores.
+- Movimiento con flechas o WASD; también se puede hacer clic en un sector vecino.
+- Dos realidades con progreso separado y mapas de nueve sectores.
+- Energía, estabilidad, escáner normal/crítico, recursos y núcleo dimensional.
+- Campaña inicial de cinco misiones con objetivos y recompensas.
+- Inventario, mensajes de IRIS y guardado automático local.
 
-## Tecnologías
+## Controles
 
-- C# y Windows Forms.
-- .NET 8 para Windows.
-- SQL Server y ADO.NET mediante `Microsoft.Data.SqlClient` 7.1.2.
-- GitHub Actions para compilación y pruebas automáticas.
-
-## Organización
-
-| Ruta | Contenido |
+| Teclas / acción | Resultado |
 |---|---|
-| `NEXUS.WinForms/Forms` | Menú principal y pantallas del juego. |
-| `NEXUS.WinForms/Models` | Cadete, partida, misiones, inventario y mapas. |
-| `NEXUS.WinForms/Services` | Reglas de movimiento, energía, anomalías y campaña. |
-| `NEXUS.WinForms/Data` | Guardado local y repositorio SQL Server. |
-| `database` | Script de creación del esquema SQL Server y guía de conexión. |
-| `tests` | Pruebas automáticas de las reglas principales. |
-| `docs` | Diseño, arquitectura, análisis y guía de uso. |
+| Flechas | Caminar a un sector vecino. |
+| W, A, S, D | Caminar a un sector vecino. |
+| Clic sobre un sector | Seleccionarlo y caminar si está conectado directamente. |
+| Pestaña Exploración | Mapa y acciones de exploración. |
+| Pestaña Misiones | Consultar objetivos y avanzar. |
+| Pestaña Inventario | Revisar y usar celdas de energía. |
 
-## SQL Server (opcional)
+Cada viaje cuesta 10 puntos de energía. El escáner normal cuesta 5 y el crítico 20. El cambio entre realidades se realiza desde la base.
 
-1. Instala SQL Server y SQL Server Management Studio.
-2. Ejecuta `database/01-esquema.sql`.
-3. Configura la variable de entorno `NEXUS_SQLSERVER_CONNECTION`. Los ejemplos están en `database/README.md`.
-4. Abre Visual Studio desde la terminal donde configuraste esa variable.
-5. Usa **Configuración SQL** en el menú para probar la conexión.
+## Organización del repositorio
 
-El guardado local funciona incluso si SQL Server no está configurado. El botón **Guardar partida** guarda localmente y, cuando existe una conexión configurada, también guarda en SQL Server. La opción **Continuar partida** busca primero el guardado local y, si no existe, puede recuperar la partida SQL usando el nombre del cadete.
+| Ruta | Responsabilidad |
+|---|---|
+| `NEXUS.sln` | Solución principal de Visual Studio. |
+| `NEXUS.WinForms/Forms` | Menú y pantallas del juego. |
+| `NEXUS.WinForms/Controls` | Menú dibujado, botones neon y escena 2D. |
+| `NEXUS.WinForms/Models` | Cadete, partida, mapas, misiones e inventario. |
+| `NEXUS.WinForms/Services` | Reglas del juego y campaña. |
+| `NEXUS.WinForms/Data` | Guardado JSON y acceso SQL Server. |
+| `database` | Script de SQL Server y guía de conexión. |
+| `tests` | Pruebas automatizadas. |
+| `docs` | Diseño, arquitectura y guías. |
 
-No guardes contraseñas ni cadenas privadas en el repositorio.
+## Persistencia
 
-## Verificación automática
+El guardado local usa tres ranuras JSON en la carpeta de datos de usuario de Windows. La integración con SQL Server está preparada en `SqlServerRepository`; para activarla, ejecuta `database/01-esquema.sql` y configura la variable de entorno `NEXUS_SQLSERVER_CONNECTION`. Los pasos están en [database/README.md](database/README.md). No se publican credenciales en GitHub.
 
-El flujo de GitHub Actions `.github/workflows/compilar-nexus.yml` restaura paquetes, compila la solución y ejecuta las pruebas de reglas del juego en Windows cada vez que se actualiza `main` o se crea un pull request.
+## Pruebas automáticas
 
-Puedes consultar el resultado en la pestaña **Actions** del repositorio.
+GitHub Actions restaura paquetes, compila los proyectos y ejecuta pruebas de las reglas del juego en Windows después de cada actualización de `main` o pull request. Consulta la pestaña **Actions** del repositorio.
 
 ## Documentación
 
 - [Diseño del videojuego](docs/diseno-del-juego.md)
-- [Arquitectura actual](docs/arquitectura-actual.md)
-- [Arquitectura propuesta e implementación](docs/arquitectura-propuesta.md)
-- [Modelo de datos SQL Server](docs/modelo-de-datos-propuestos.md)
 - [Estado de implementación](docs/estado-implementacion.md)
+- [Arquitectura](docs/arquitectura-propuesta.md)
+- [Modelo de datos SQL Server](docs/modelo-de-datos-propuestos.md)
 - [Guía para clonar y ejecutar](docs/guia-clonado-y-ejecucion.md)
+
+## Mejoras futuras
+
+Se propone ampliar las ilustraciones originales por sector y realidad, incorporar música y efectos de sonido, añadir animaciones de portal, anomalías y objetos, y desarrollar nuevas campañas después de la historia inicial de cinco misiones. La versión actual ya tiene una escena alienígena dibujada por código y una animación básica de caminata; los efectos avanzados y las campañas adicionales siguen pendientes.
