@@ -1,64 +1,109 @@
 # NEXUS — Diseño del videojuego
 
-**Estudiante:** Jubal Abner Serrano Nina  
-**Proyecto:** NEXUS  
-**Versión de partida:** aplicación de consola en C#  
-**Documento:** Propuesta de experiencia de usuario para la evolución gráfica
----
-1. Visión General del Juego
-Ambientación: Año 2297. El jugador es un cadete explorador que investiga anomalías en dimensiones desconocidas.
+**Proyecto:** NEXUS — Exploration / Reality System  
+**Género:** Exploración y ciencia ficción 2D  
+**Plataforma:** Windows  
+**Tecnología:** C#, Windows Forms y SQL Server (persistencia opcional)
 
-Pilares de la experiencia:
+## 1. Visión del juego
 
-Descubrimiento: Explorar zonas y revelar anomalías ocultas.
-Decisiones: Gestionar cuándo avanzar, gastar energía o retroceder para proteger el progreso.
-Progreso: Completar misiones, registrar realidades y desbloquear nuevos objetivos.
-Sistema de Apoyo: IRIS actúa como la inteligencia artificial que emite alertas y mensajes de estado críticos.
+Año 2297. Las realidades conocidas han comenzado a cambiar y se detectan anomalías dimensionales en distintos sectores. El jugador es un cadete explorador que debe recorrer estas realidades, recuperar recursos y analizar anomalías para proteger la estabilidad del sistema NEXUS.
 
- 2. Ciclo Principal de Juego
+IRIS es el sistema de apoyo que acompaña al cadete. Informa sobre riesgos, energía, objetivos de misión y resultados de las acciones.
 
-El flujo de una partida sigue un ciclo estructurado:
-Inicio: Crear un nuevo perfil de cadete o cargar una partida guardada.
-Planificación: Consultar la misión activa, el estado actual y el mapa disponible.
-Exploración: Seleccionar una zona y verificar si hay energía suficiente para la acción.
-Interacción: Explorar la zona, actualizar recursos (energía/estabilidad) y reunir hallazgos.
-Cierre: Al cumplir el objetivo, se otorga la recompensa, se guarda el progreso y se avanza a la siguiente misión o al menú.
+La experiencia se apoya en cuatro pilares:
 
-3. Mecánicas Clave
+- **Exploración:** recorrer sectores conectados y descubrir recursos o anomalías.
+- **Decisiones:** administrar la energía y decidir cuándo analizar, regresar o cambiar de realidad.
+- **Progreso:** completar misiones, obtener recompensas y desbloquear la siguiente parte de la campaña.
+- **Investigación:** registrar muestras y utilizar el inventario para mantener al cadete preparado.
 
-Cadete: Muestra nombre, energía actual, estabilidad de la realidad y misión activa de forma persistente en pantalla.
-Mapas y Zonas: Las realidades se clasifican en Disponible, En exploración, Explorada o Bloqueada.
-Recursos (Energía y Estabilidad): Las acciones consumen energía (con validación previa estricta). La estabilidad mide la seguridad de la realidad y avisa de riesgos críticos mediante IRIS. La recarga debe ser una acción explícita.
-Misiones e Inventario: Gestión de misiones con estados (Pendiente, En progreso, Completada) y un inventario básico para consultar hallazgos u objetos consumibles.
+## 2. Ciclo principal de juego
 
-4. Pantallas y Navegación Propuestas
+1. **Inicio:** el jugador escribe el nombre del cadete, elige una realidad inicial y una ranura.
+2. **Planificación:** consulta la misión activa y el estado del cadete.
+3. **Exploración:** camina a sectores vecinos mediante las flechas, WASD o clic del ratón.
+4. **Interacción:** recupera recursos, examina anomalías y administra energía y estabilidad.
+5. **Regreso:** vuelve a la base para recargar, purgar el núcleo o completar el objetivo.
+6. **Progresión:** recibe la recompensa, guarda la partida y activa la siguiente misión.
 
-El diseño visual se estructurará en Windows Forms mediante wireframes claros y consistentes:
-Menú Principal: Nueva partida, continuar, perfiles, configuración y salida.
-Pantalla de Exploración / Mapa: Panel central con indicadores de recursos, mapa en 2D y controles de acción.
-Pantalla de Misiones: Listado de objetivos, descripciones detalladas y estados.
-Exploradores e Inventario: Visualización del cadete, objetos encontrados y opciones de uso.
+## 3. Mecánicas y reglas
 
-5. Alcance y Restricciones
+### Explorador
 
-Prioridad de la 1ª Etapa Gráfica:
-Mantener la base lógica del código original de C# (H3).
-Crear la interfaz en Windows Forms con el flujo central operativo (perfil, mapa, validación de energía, misiones básicas e inventario).
-Separar la lógica del juego de los eventos visuales de los botones.
-Fuera del Alcance Inicial (Futuro): Animaciones complejas, efectos de sonido avanzados, generación procedural avanzada, IA compleja de enemigos o multijugador.
-Seguridad y Persistencia: El uso de SQL Server y el guardado de partidas se integrarán de forma robusta en una fase posterior, evitando credenciales hardcodeadas y manejando errores de conexión de manera segura.
+El cadete tiene nombre, realidad actual, energía, estabilidad, nivel de acceso y un inventario. Se representa dentro de la escena 2D y cuenta con una animación básica de caminata cuando se desplaza entre sectores.
 
- 
-## 6. Estado de implementación de la propuesta
+### Mapas y realidades
 
-La primera versión gráfica organizada se encuentra en la solución `NEXUS.sln` y el proyecto `NEXUS.WinForms`. Esta versión incluye un menú de acceso, tres ranuras de guardado, mapa de nueve sectores, progreso separado para Alfa y Beta, pantallas de exploración, misiones e inventario y mensajes del sistema IRIS.
+La campaña inicial contiene dos realidades:
 
-La campaña inicial incluye cinco misiones: Primer contacto, Señal desconocida, Núcleo perdido, Ruptura dimensional y El origen de NEXUS. Las misiones tienen objetivos concretos, como recuperar recursos, analizar sectores específicos, realizar una lectura crítica, purgar el núcleo y regresar a la base.
+- **Alfa:** base central, depósito de energía, pasajes y anomalía central.
+- **Beta:** base central, anomalías y un depósito de energía.
 
-El guardado local en JSON está implementado. También se añadió el acceso a SQL Server mediante `SqlServerRepository` y el script `database/01-esquema.sql`. La conexión real necesita que cada computadora ejecute el script y configure su propia variable de entorno; no se incluye una contraseña en el repositorio.
+Cada realidad tiene nueve sectores en una cuadrícula 3×3. El cadete solo puede moverse a un sector vecino. El avance de las zonas visitadas y exploradas se conserva por separado para Alfa y Beta.
 
-## 7. Funciones para futuras versiones
+### Energía
 
-La versión actual es una primera campaña jugable y una base de Windows Forms. Todavía se pueden mejorar los gráficos del mapa, agregar ilustraciones de las realidades, incorporar efectos de sonido, aumentar el catálogo de objetos y crear nuevas campañas. Estas mejoras no deben confundirse con funciones ya terminadas.
+Cada viaje cuesta 10 puntos. Un escaneo normal cuesta 5 y uno crítico cuesta 20. Si el cadete no tiene energía suficiente, la acción se rechaza sin descontar energía. La base permite recargar y el inventario incluye celdas que recuperan energía.
 
-Para abrir el proyecto se debe utilizar `NEXUS.sln` desde Visual Studio 2022 17.8 o posterior, con .NET 8 y la carga de trabajo de desarrollo de escritorio. La guía completa está en `docs/guia-clonado-y-ejecucion.md`.
+### Estabilidad y núcleo
+
+Un escaneo crítico reduce 20 puntos de estabilidad y vuelve inestable el núcleo. El cadete debe regresar a la base y ejecutar la purga para recuperar estabilidad y completar la misión que lo requiera.
+
+### Misiones
+
+La campaña inicial incluye cinco misiones con requisitos y recompensas:
+
+| Código | Misión | Objetivos principales |
+|---|---|---|
+| MIS-001 | Primer contacto | Recuperar una celda en Alfa y analizar la anomalía central. |
+| MIS-002 | Señal desconocida | Investigar la señal del sector norte de Beta. |
+| MIS-003 | Núcleo perdido | Recuperar el recurso del depósito de Beta. |
+| MIS-004 | Ruptura dimensional | Analizar dos anomalías de Beta, realizar una lectura crítica y purgar el núcleo. |
+| MIS-005 | El origen de NEXUS | Regresar a Alfa, visitar la anomalía central y volver a la base. |
+
+### Inventario
+
+Los objetos de la versión actual son la celda de energía, que puede consumirse para recuperar 25 puntos, y la muestra de anomalía, que se conserva como material de investigación.
+
+## 4. Interfaz y navegación
+
+### Menú principal
+
+La portada utiliza una paleta oscura azul/cian, un portal dimensional dibujado y botones poligonales luminosos. Desde allí se puede iniciar o continuar una partida, elegir realidad, configurar la conexión SQL, consultar información del juego y salir.
+
+### Pantalla de exploración
+
+La escena presenta un paisaje alienígena con planeta, estructuras, agua luminosa, plataformas y rutas holográficas. Los sectores se muestran como nodos conectados. El cadete aparece sobre el mapa y camina entre nodos al desplazarse.
+
+### Misiones e inventario
+
+Las pestañas permiten revisar los objetivos de campaña y los objetos. Los controles de energía, análisis, purga y cambio de realidad se activan según la situación del cadete.
+
+## 5. Persistencia y arquitectura
+
+La aplicación separa modelos, reglas, interfaz y acceso a datos:
+
+- `Models`: cadete, partida, mapas, misiones e inventario.
+- `Services`: movimiento, análisis, recursos, energía y campaña.
+- `Forms`: menú y pantallas.
+- `Controls`: dibujo de la portada, botones y escena 2D.
+- `Data`: guardado JSON y repositorio SQL Server.
+
+El guardado local dispone de tres ranuras. SQL Server está preparado mediante el script `database/01-esquema.sql` y la clase `SqlServerRepository`. La conexión necesita configuración en cada equipo mediante `NEXUS_SQLSERVER_CONNECTION`; por eso no se incluyen contraseñas en el repositorio.
+
+## 6. Mejoras futuras
+
+Las siguientes son propuestas para versiones posteriores, no funciones terminadas de la versión actual:
+
+1. Crear ilustraciones originales detalladas para cada sector, bioma, anomalía y realidad.
+2. Añadir música ambiental y efectos de sonido para pasos, escáner, portales, interfaz y alertas de IRIS.
+3. Ampliar las animaciones actuales con ciclos completos de caminata, interacciones, partículas, anomalías y transiciones dimensionales.
+4. Desarrollar nuevas campañas después de MIS-005 con historias, mapas, objetivos y recompensas adicionales.
+5. Incorporar más objetos, peligros ambientales, criaturas, estadísticas y logros.
+
+La versión actual ya incluye una escena 2D dibujada por código y una animación básica de caminata. Las mejoras futuras ampliarían esa base sin sustituir las reglas centrales ya implementadas.
+
+## 7. Cómo ejecutar
+
+Abrir `NEXUS.sln` desde Visual Studio 2022 versión 17.8 o posterior, con .NET 8 y la carga de trabajo Desarrollo de escritorio de .NET. La guía paso a paso se encuentra en [guia-clonado-y-ejecucion.md](guia-clonado-y-ejecucion.md).
